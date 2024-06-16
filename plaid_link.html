@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plaid Link</title>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+</head>
+<body>
+  <button id="linkButton">Open Plaid Link</button>
+
+  <script type="text/javascript">
+    var linkHandler = Plaid.create({
+      token: 'link-development-3873b8a2-3c98-415e-918a-7992b1b8631b',  // Replace with the link token generated above
+      onSuccess: function(public_token, metadata) {
+        // Display the public_token
+        alert('Public Token: ' + public_token);
+        console.log('Public Token: ', public_token);
+      },
+      onExit: function(err, metadata) {
+        // Handle the case when the user exits the Link flow.
+        if (err != null) {
+          console.log(err);
+        }
+      }
+    });
+
+    document.getElementById('linkButton').onclick = function() {
+      linkHandler.open();
+    };
+  </script>
+</body>
+</html>
