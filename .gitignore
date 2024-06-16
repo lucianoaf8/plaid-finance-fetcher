@@ -2,3 +2,4 @@
 fetched-files/*
 logs/*
 __pycache__/
+.idea/
