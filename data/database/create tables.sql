@@ -1,3 +1,11 @@
+DROP TABLE IF EXISTS finance.file_import_tracker;
+CREATE TABLE finance.file_import_tracker (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    import_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description TEXT
+);
+
 DROP TABLE IF EXISTS finance.plaid_liabilities_credit;
 CREATE TABLE finance.plaid_liabilities_credit (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -8,8 +16,11 @@ CREATE TABLE finance.plaid_liabilities_credit (
     last_statement_issue_date DATE,
     last_statement_balance DECIMAL(10, 2),
     minimum_payment_amount DECIMAL(10, 2),
-    next_payment_due_date DATE
+    next_payment_due_date DATE,
+    file_import_id INT,
+    FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE
 );
+
 
 DROP TABLE IF EXISTS finance.plaid_liabilities_credit_apr;
 CREATE TABLE finance.plaid_liabilities_credit_apr (
@@ -19,13 +30,7 @@ CREATE TABLE finance.plaid_liabilities_credit_apr (
     apr_type VARCHAR(255),
     balance_subject_to_apr DECIMAL(10, 2),
     interest_charge_amount DECIMAL(10, 2),
+    file_import_id INT,
+    FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE,
     FOREIGN KEY (account_id) REFERENCES plaid_liabilities_credit(account_id)
-);
-
-DROP TABLE IF EXISTS finance.file_import_tracker
-CREATE TABLE finance.file_import_tracker (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    file_name VARCHAR(255) NOT NULL,
-    import_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    description TEXT
 );

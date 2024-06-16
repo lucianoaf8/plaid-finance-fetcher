@@ -1,0 +1,3 @@
+2024-06-16 12:39:35,497 ERROR:Error inserting liabilities for Tangerine from plaid_liabilities_Tangerine_20240616122516.json: 2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)
+2024-06-16 12:41:02,029 ERROR:Error inserting liabilities for Tangerine from plaid_liabilities_Tangerine_20240616122516.json: 2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)
+2024-06-16 12:41:33,036 INFO:Successfully inserted liabilities for Tangerine from plaid_liabilities_Tangerine_20240616122516.json
