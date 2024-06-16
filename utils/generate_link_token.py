@@ -14,6 +14,10 @@ PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
 PLAID_ENV = os.getenv("PLAID_ENV", "development")  # Set default to development
 
+# Check if environment variables are loaded correctly
+if not PLAID_CLIENT_ID or not PLAID_SECRET:
+    raise ValueError("PLAID_CLIENT_ID and PLAID_SECRET must be set in the .env file")
+
 # Determine the Plaid environment URL
 PLAID_ENV_URLS = {
     "sandbox": "https://sandbox.plaid.com",
@@ -45,5 +49,8 @@ def create_link_token():
     return response['link_token']
 
 if __name__ == "__main__":
-    link_token = create_link_token()
-    print(f"Link Token: {link_token}")
+    try:
+        link_token = create_link_token()
+        print(f"Link Token: {link_token}")
+    except plaid.ApiException as e:
+        print(f"An error occurred: {e}")
