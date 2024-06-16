@@ -1,3 +1,2 @@
 *.env
-ignore/
 fetched-files/*

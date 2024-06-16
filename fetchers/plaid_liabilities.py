@@ -10,15 +10,14 @@ load_dotenv()
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
-PLAID_ACCESS_TOKEN = os.getenv("PLAID_ACCESS_TOKEN")
-PLAID_ENV = os.getenv("PLAID_ENV", "development")  # Ensuring the environment is set to 'development'
+PLAID_ENV = os.getenv("PLAID_ENV", "development")
 
 PLAID_ENV_URLS = {
     "sandbox": "https://sandbox.plaid.com",
     "development": "https://development.plaid.com",
     "production": "https://production.plaid.com"
 }
-PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://development.plaid.com")  # Default to 'development'
+PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://development.plaid.com")
 
 configuration = configuration.Configuration(
     host=PLAID_HOST,
@@ -40,17 +39,22 @@ def convert_dates_to_strings(obj):
         obj = obj.isoformat()
     return obj
 
-def fetch_liabilities():
-    request = LiabilitiesGetRequest(access_token=PLAID_ACCESS_TOKEN)
+def fetch_liabilities(access_token, bank_name):
+    request = LiabilitiesGetRequest(access_token=access_token)
     response = client.liabilities_get(request)
     liabilities = response['liabilities']
     
     liabilities_dict = convert_dates_to_strings(liabilities.to_dict())
 
-    with open('fetched-files/liabilities.json', 'w') as file:
+    filename = f'data/fetched-files/plaid_liabilities_{bank_name}.json'
+    with open(filename, 'w') as file:
         json.dump(liabilities_dict, file, indent=4)
 
-    print("Liabilities fetched and saved successfully.")
+    print(f"Liabilities for {bank_name} fetched and saved successfully as {filename}.")
 
 if __name__ == "__main__":
-    fetch_liabilities()
+    access_token = os.getenv("PLAID_ACCESS_TOKEN")
+    if access_token:
+        fetch_liabilities(access_token, 'default_bank')
+    else:
+        print("Access token is required.")

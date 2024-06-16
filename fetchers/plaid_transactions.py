@@ -10,7 +10,6 @@ load_dotenv()
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
-PLAID_ACCESS_TOKEN = os.getenv("PLAID_ACCESS_TOKEN")
 PLAID_ENV = os.getenv("PLAID_ENV", "development")
 
 PLAID_ENV_URLS = {
@@ -40,11 +39,11 @@ def convert_dates_to_strings(obj):
         obj = obj.isoformat()
     return obj
 
-def fetch_transactions():
+def fetch_transactions(access_token, bank_name):
     start_date = datetime.now() - timedelta(days=30)
     end_date = datetime.now()
     request = TransactionsGetRequest(
-        access_token=PLAID_ACCESS_TOKEN,
+        access_token=access_token,
         start_date=start_date.date(),
         end_date=end_date.date()
     )
@@ -53,10 +52,15 @@ def fetch_transactions():
     
     transactions_dicts = [convert_dates_to_strings(transaction.to_dict()) for transaction in transactions]
 
-    with open('fetched-files/transactions.json', 'w') as file:
+    filename = f'data/fetched-files/plaid_transactions_{bank_name}.json'
+    with open(filename, 'w') as file:
         json.dump(transactions_dicts, file, indent=4)
 
-    print("Transactions fetched and saved successfully.")
+    print(f"Transactions for {bank_name} fetched and saved successfully as {filename}.")
 
 if __name__ == "__main__":
-    fetch_transactions()
+    access_token = os.getenv("PLAID_ACCESS_TOKEN")
+    if access_token:
+        fetch_transactions(access_token, 'default_bank')
+    else:
+        print("Access token is required.")

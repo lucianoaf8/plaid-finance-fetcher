@@ -4,39 +4,47 @@
   <meta charset="UTF-8">
   <title>Plaid Link</title>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      fetch('/generate_link_token')
+        .then(response => response.json())
+        .then(data => {
+          var linkHandler = Plaid.create({
+            token: data.link_token,
+            onSuccess: function(public_token, metadata) {
+              fetch('/exchange_public_token', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ public_token: public_token }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('Access Token:', data.access_token);
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+            },
+            onExit: function(err, metadata) {
+              if (err != null) {
+                console.error('Exit with error:', err);
+              }
+            },
+          });
+
+          document.getElementById('linkButton').onclick = function() {
+            linkHandler.open();
+          };
+        })
+        .catch(error => {
+          console.error('Error fetching link token:', error);
+        });
+    });
+  </script>
 </head>
 <body>
   <button id="linkButton">Link Bank Account</button>
-  <script>
-    document.getElementById('linkButton').onclick = function () {
-      var linkHandler = Plaid.create({
-        token: 'link-development-6d1765ca-db7c-475f-a92f-afde4e393eee', // Replace with the link token generated in Step 1
-        onSuccess: function(public_token, metadata) {
-          // Send the public_token to your server to exchange it for an access token
-          fetch('http://localhost:5000/exchange_public_token', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ public_token: public_token }),
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log('Access Token:', data.access_token);
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
-        },
-        onExit: function(err, metadata) {
-          if (err != null) {
-            console.error('Exit with error:', err);
-          }
-        },
-      });
-
-      linkHandler.open();
-    };
-  </script>
 </body>
 </html>
