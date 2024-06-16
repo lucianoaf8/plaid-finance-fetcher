@@ -1,5 +1,4 @@
 DROP TABLE IF EXISTS finance.plaid_liabilities_credit;
--- Create the plaid_liabilities_credit table with a unique constraint on account_id
 CREATE TABLE finance.plaid_liabilities_credit (
     id INT AUTO_INCREMENT PRIMARY KEY,
     account_id VARCHAR(255) NOT NULL UNIQUE,
@@ -13,7 +12,6 @@ CREATE TABLE finance.plaid_liabilities_credit (
 );
 
 DROP TABLE IF EXISTS finance.plaid_liabilities_credit_apr;
--- Create the plaid_liabilities_credit_apr table
 CREATE TABLE finance.plaid_liabilities_credit_apr (
     id INT AUTO_INCREMENT PRIMARY KEY,
     account_id VARCHAR(255) NOT NULL,
@@ -22,4 +20,12 @@ CREATE TABLE finance.plaid_liabilities_credit_apr (
     balance_subject_to_apr DECIMAL(10, 2),
     interest_charge_amount DECIMAL(10, 2),
     FOREIGN KEY (account_id) REFERENCES plaid_liabilities_credit(account_id)
+);
+
+DROP TABLE IF EXISTS finance.file_import_tracker
+CREATE TABLE finance.file_import_tracker (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    import_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description TEXT
 );

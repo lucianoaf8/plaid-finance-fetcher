@@ -46,7 +46,8 @@ def fetch_liabilities(access_token, bank_name):
     
     liabilities_dict = convert_dates_to_strings(liabilities.to_dict())
 
-    filename = f'data/fetched-files/plaid_liabilities_{bank_name}.json'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    filename = f'data/fetched-files/plaid_liabilities_{bank_name}_{timestamp}.json'
     with open(filename, 'w') as file:
         json.dump(liabilities_dict, file, indent=4)
 

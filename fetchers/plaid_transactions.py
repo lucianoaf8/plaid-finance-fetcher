@@ -52,7 +52,8 @@ def fetch_transactions(access_token, bank_name):
     
     transactions_dicts = [convert_dates_to_strings(transaction.to_dict()) for transaction in transactions]
 
-    filename = f'data/fetched-files/plaid_transactions_{bank_name}.json'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    filename = f'data/fetched-files/plaid_transactions_{bank_name}_{timestamp}.json'
     with open(filename, 'w') as file:
         json.dump(transactions_dicts, file, indent=4)
 
