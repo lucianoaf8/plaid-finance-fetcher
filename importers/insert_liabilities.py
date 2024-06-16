@@ -146,8 +146,10 @@ def insert_liabilities(data, bank_name, file_name):
 
 if __name__ == "__main__":
     # This part allows the script to be run independently
-    test_file_name = 'plaid_liabilities_Tangerine_20240616153614.json'
-    test_bank_name = 'Tangerine'
-    with open(f'data/fetched-files/{test_file_name}', 'r') as file:
-        test_data = json.load(file)
-    insert_liabilities(test_data, test_bank_name, test_file_name)
+    fetched_files_dir = 'data/fetched-files'
+    for file_name in os.listdir(fetched_files_dir):
+        if file_name.startswith('plaid_liabilities_') and file_name.endswith('.json'):
+            bank_name = file_name.split('_')[2]  # Assuming the file name format is consistent
+            with open(os.path.join(fetched_files_dir, file_name), 'r') as file:
+                liabilities_data = json.load(file)
+            insert_liabilities(liabilities_data, bank_name, file_name)

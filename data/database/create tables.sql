@@ -105,11 +105,17 @@ CREATE TABLE plaid_transaction_counterparties (
     FOREIGN KEY (transaction_id) REFERENCES plaid_transactions(transaction_id) ON DELETE CASCADE
 );
 
-CREATE TABLE fetch_history (
+DROP TABLE IF EXISTS plaid_accounts;
+CREATE TABLE plaid_accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id VARCHAR(255) NOT NULL,
-    last_fetch_date DATE,
-    UNIQUE(account_id)
+    account_id VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255),
+    official_name VARCHAR(255),
+    type VARCHAR(50),
+    subtype VARCHAR(50),
+    bank_name VARCHAR(50),
+    access_token VARCHAR(255) NOT NULL,
+    last_fetch_date DATE
 );
 
 # History tables

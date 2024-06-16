@@ -70,10 +70,13 @@ def fetch_liabilities(access_token, bank_name):
         message = f"Liabilities for {bank_name} fetched and saved successfully as {filename}."
         print(message)
         logging.info(message)
+
+        return filename
     except Exception as e:
         message = f"Error fetching liabilities for {bank_name}: {e}"
         print(message)
         logging.error(message)
+        return None
 
 if __name__ == "__main__":
     access_token = os.getenv("ACCESS_TOKEN_TANGERINE")

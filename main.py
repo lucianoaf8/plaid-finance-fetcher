@@ -1,38 +1,71 @@
 import os
-from utils import setup
+import logging
 from dotenv import load_dotenv
-from fetchers import plaid_transactions
-from fetchers import plaid_liabilities
-from utils import insert_data
-
-# Run the setup script to verify and create the project structure
-setup.verify_and_create_structure()
+from datetime import datetime
+from urllib.parse import urlparse
+import mysql.connector
+import fetchers.plaid_transactions as fetch_transactions
+import fetchers.plaid_liabilities as fetch_liabilities
+import importers.insert_transactions as insert_transactions
+import importers.insert_liabilities as insert_liabilities
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Fetch access tokens for multiple accounts from environment variables
-access_tokens = {
-    # "CIBC": os.getenv("ACCESS_TOKEN_CIBC"),
-    "Tangerine": os.getenv("ACCESS_TOKEN_TANGERINE"),
-    # "Triangle": os.getenv("ACCESS_TOKEN_TRIANGLE"),
-    # "MBNA": os.getenv("ACCESS_TOKEN_MBNA")
-}
+# Set up logging
+log_dir = 'logs'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 
-def main():
-    for bank, token in access_tokens.items():
-        if token:
-            print(f"Fetching data for {bank}...")
-            print("Fetching transactions...")
-            plaid_transactions.fetch_transactions(token, bank)
-            print("Fetching liabilities...")
-            plaid_liabilities.fetch_liabilities(token, bank)
-        else:
-            print(f"Access token for {bank} is not set.")
-    
-    print("Starting data import process...")
-    insert_data.import_files()
-    print("Data import process completed.")
+today = datetime.now().strftime('%Y-%m-%d')
+logging.basicConfig(
+    filename=os.path.join(log_dir, f'main_{today}.log'),
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
+
+def get_db_connection():
+    MYSQL_URL = os.getenv("MYSQL_URL")
+    MYSQL_USER = os.getenv("MYSQL_USER")
+    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+
+    url = urlparse(MYSQL_URL)
+    return mysql.connector.connect(
+        host=url.hostname,
+        port=url.port if url.port else 3306,
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        database=url.path.lstrip('/')
+    )
+
+def get_access_tokens_from_db():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT DISTINCT access_token, bank_name FROM plaid_accounts")
+    tokens = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return tokens
 
 if __name__ == "__main__":
-    main()
+    print("Starting fetch and import process...")
+    logging.info("Starting fetch and import process...")
+    tokens = get_access_tokens_from_db()
+    for token in tokens:
+        access_token = token['access_token']
+        bank_name = token['bank_name']
+
+        # Fetch transactions
+        transactions_file = fetch_transactions.fetch_transactions(access_token, bank_name)
+        # Fetch liabilities
+        liabilities_file = fetch_liabilities.fetch_liabilities(access_token, bank_name)
+
+        # Import transactions
+        if transactions_file:
+            insert_transactions.insert_transactions(transactions_file, bank_name, transactions_file)
+        # Import liabilities
+        if liabilities_file:
+            insert_liabilities.insert_liabilities(liabilities_file, bank_name, liabilities_file)
+
+    print("Fetch and import process completed.")
+    logging.info("Fetch and import process completed.")

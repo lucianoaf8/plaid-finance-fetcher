@@ -54,6 +54,7 @@ def convert_dates_to_strings(obj):
     return obj
 
 def fetch_transactions(access_token, bank_name):
+    logging.info(f"Fetching transactions for {bank_name} with access token {access_token[:4]}***...")
     try:
         start_date = datetime.now() - timedelta(days=30)
         end_date = datetime.now()
@@ -75,14 +76,17 @@ def fetch_transactions(access_token, bank_name):
         message = f"Transactions for {bank_name} fetched and saved successfully as {filename}."
         print(message)
         logging.info(message)
+
+        return filename
     except Exception as e:
         message = f"Error fetching transactions for {bank_name}: {e}"
         print(message)
         logging.error(message)
+        return None
 
 if __name__ == "__main__":
-    access_token = os.getenv("PLAID_ACCESS_TOKEN")
-    bank_name = 'default_bank'
+    access_token = os.getenv("ACCESS_TOKEN_TANGERINE")
+    bank_name = 'Tangerine'
     print(f"Starting transactions fetch process for {bank_name}...")
     logging.info(f"Starting transactions fetch process for {bank_name}...")
     if access_token:
