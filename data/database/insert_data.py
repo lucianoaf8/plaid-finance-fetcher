@@ -17,8 +17,10 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 log_dir = 'logs'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
+
+today = datetime.now().strftime('%Y-%m-%d')
 logging.basicConfig(
-    filename=os.path.join(log_dir, 'insert_data.log'),
+    filename=os.path.join(log_dir, f'insert_data_{today}.log'),
     level=logging.INFO,
     format='%(asctime)s %(levelname)s:%(message)s'
 )
@@ -30,7 +32,8 @@ def get_db_connection():
         port=url.port if url.port else 3306,
         user=MYSQL_USER,
         password=MYSQL_PASSWORD,
-        database=url.path.lstrip('/')
+        database=url.path.lstrip('/'),
+        use_pure=True
     )
 
 def insert_liabilities(data, bank_name, file_name):
@@ -90,9 +93,13 @@ def insert_liabilities(data, bank_name, file_name):
                 ))
 
         conn.commit()
-        logging.info(f"Successfully inserted liabilities for {bank_name} from {file_name}")
+        message = f"Successfully inserted liabilities for {bank_name} from {file_name}"
+        print(message)
+        logging.info(message)
     except Exception as e:
-        logging.error(f"Error inserting liabilities for {bank_name} from {file_name}: {e}")
+        message = f"Error inserting liabilities for {bank_name} from {file_name}: {e}"
+        print(message)
+        logging.error(message)
     finally:
         cursor.close()
         conn.close()
@@ -101,10 +108,16 @@ def import_liabilities_files():
     fetched_files_dir = 'data/fetched-files/'
     for file_name in os.listdir(fetched_files_dir):
         if file_name.startswith("plaid_liabilities_") and file_name.endswith(".json"):
+            print(f"Processing file: {file_name}")
+            logging.info(f"Processing file: {file_name}")
             with open(fetched_files_dir + file_name) as file:
                 data = json.load(file)
                 bank_name = file_name.split("_")[2].replace(".json", "")
                 insert_liabilities(data, bank_name, file_name)
 
 if __name__ == "__main__":
+    print("Starting import process...")
+    logging.info("Starting import process...")
     import_liabilities_files()
+    print("Import process completed.")
+    logging.info("Import process completed.")
