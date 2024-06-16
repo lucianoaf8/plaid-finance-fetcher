@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from dotenv import load_dotenv
 from datetime import datetime
 from urllib.parse import urlparse
@@ -57,15 +58,25 @@ if __name__ == "__main__":
 
         # Fetch transactions
         transactions_file = fetch_transactions.fetch_transactions(access_token, bank_name)
+        if transactions_file:
+            try:
+                with open(transactions_file, 'r') as file:
+                    transactions_data = json.load(file)
+                insert_transactions.insert_transactions(transactions_data, bank_name, os.path.basename(transactions_file))
+            except Exception as e:
+                logging.error(f"Error inserting transactions for {bank_name} from {transactions_file}: {e}")
+                print(f"Error inserting transactions for {bank_name} from {transactions_file}: {e}")
+
         # Fetch liabilities
         liabilities_file = fetch_liabilities.fetch_liabilities(access_token, bank_name)
-
-        # Import transactions
-        if transactions_file:
-            insert_transactions.insert_transactions(transactions_file, bank_name, transactions_file)
-        # Import liabilities
         if liabilities_file:
-            insert_liabilities.insert_liabilities(liabilities_file, bank_name, liabilities_file)
+            try:
+                with open(liabilities_file, 'r') as file:
+                    liabilities_data = json.load(file)
+                insert_liabilities.insert_liabilities(liabilities_data, bank_name, os.path.basename(liabilities_file))
+            except Exception as e:
+                logging.error(f"Error inserting liabilities for {bank_name} from {liabilities_file}: {e}")
+                print(f"Error inserting liabilities for {bank_name} from {liabilities_file}: {e}")
 
     print("Fetch and import process completed.")
     logging.info("Fetch and import process completed.")

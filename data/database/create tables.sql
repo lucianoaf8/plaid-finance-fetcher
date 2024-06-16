@@ -122,7 +122,7 @@ CREATE TABLE plaid_accounts (
 DROP TABLE IF EXISTS finance.plaid_liabilities_credit_history;
 CREATE TABLE finance.plaid_liabilities_credit_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id VARCHAR(255) NOT NULL UNIQUE,
+    account_id VARCHAR(255) NOT NULL,
     is_overdue BOOLEAN NOT NULL,
     last_payment_amount DECIMAL(10, 2),
     last_payment_date DATE,
