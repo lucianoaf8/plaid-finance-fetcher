@@ -1,5 +1,5 @@
 *.env
-fetched-files/
+fetched-files/*
 logs/
 __pycache__/
 fetchers/__pycache__/

@@ -1,0 +1,36 @@
+{
+    "credit": [
+        {
+            "account_id": "4kENEeAJvjhNdnnm9QgeF7b5g8qE1mTR3x6Rg",
+            "aprs": [
+                {
+                    "apr_percentage": 3.0,
+                    "apr_type": "balance_transfer_apr",
+                    "balance_subject_to_apr": null,
+                    "interest_charge_amount": null
+                },
+                {
+                    "apr_percentage": 19.95,
+                    "apr_type": "cash_apr",
+                    "balance_subject_to_apr": null,
+                    "interest_charge_amount": 0.0
+                },
+                {
+                    "apr_percentage": 19.95,
+                    "apr_type": "purchase_apr",
+                    "balance_subject_to_apr": null,
+                    "interest_charge_amount": 146.51
+                }
+            ],
+            "is_overdue": false,
+            "last_payment_amount": 200.0,
+            "last_payment_date": "2024-06-07",
+            "last_statement_issue_date": null,
+            "last_statement_balance": 8498.32,
+            "minimum_payment_amount": 156.51,
+            "next_payment_due_date": "2024-07-13"
+        }
+    ],
+    "mortgage": null,
+    "student": null
+}
