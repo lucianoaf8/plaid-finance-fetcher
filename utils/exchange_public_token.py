@@ -9,7 +9,7 @@ load_dotenv()
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
-PLAID_ENV = os.getenv("PLAID_ENV", "development")  # Set default to development
+PLAID_ENV = os.getenv("PLAID_ENV", "development")  # Ensure this is 'development' for testing
 
 # Determine the Plaid environment URL
 PLAID_ENV_URLS = {
@@ -31,11 +31,18 @@ api_client = api_client.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
 def exchange_public_token(public_token):
-    request = ItemPublicTokenExchangeRequest(public_token=public_token)
+    request = ItemPublicTokenExchangeRequest(
+        client_id=PLAID_CLIENT_ID,
+        secret=PLAID_SECRET,
+        public_token=public_token
+    )
     response = client.item_public_token_exchange(request)
     return response['access_token']
 
 if __name__ == "__main__":
-    public_token = input("Enter the public token obtained from Plaid Link: ")
-    access_token = exchange_public_token(public_token)
-    print(f"Access Token: {access_token}")
+    public_token = input("Enter the public token: ")
+    try:
+        access_token = exchange_public_token(public_token)
+        print(f"Access Token: {access_token}")
+    except plaid.ApiException as e:
+        print(f"An error occurred: {e}")

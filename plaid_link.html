@@ -1,29 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Plaid Link</title>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 </head>
 <body>
-  <button id="linkButton">Open Plaid Link</button>
+  <button id="linkButton">Link Bank Account</button>
+  <script>
+    document.getElementById('linkButton').onclick = function () {
+      var linkHandler = Plaid.create({
+        token: 'link-development-6d1765ca-db7c-475f-a92f-afde4e393eee', // Replace with the link token generated in Step 1
+        onSuccess: function(public_token, metadata) {
+          // Send the public_token to your server to exchange it for an access token
+          fetch('http://localhost:5000/exchange_public_token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ public_token: public_token }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Access Token:', data.access_token);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        },
+        onExit: function(err, metadata) {
+          if (err != null) {
+            console.error('Exit with error:', err);
+          }
+        },
+      });
 
-  <script type="text/javascript">
-    var linkHandler = Plaid.create({
-      token: 'link-development-7e8a5e00-effd-4d24-835f-ced2293aba82',  // Replace with the link token generated above
-      onSuccess: function(public_token, metadata) {
-        // Display the public_token
-        alert('Public Token: ' + public_token);
-        console.log('Public Token: ', public_token);
-      },
-      onExit: function(err, metadata) {
-        // Handle the case when the user exits the Link flow.
-        if (err != null) {
-          console.log(err);
-        }
-      }
-    });
-
-    document.getElementById('linkButton').onclick = function() {
       linkHandler.open();
     };
   </script>
