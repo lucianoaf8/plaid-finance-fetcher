@@ -2,4 +2,6 @@
 fetched-files/
 logs/
 __pycache__/
+fetchers/__pycache__/
+utils/__pycache__/
 .idea/
