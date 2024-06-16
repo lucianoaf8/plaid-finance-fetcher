@@ -54,6 +54,7 @@ def convert_dates_to_strings(obj):
     return obj
 
 def fetch_liabilities(access_token, bank_name):
+    logging.info(f"Fetching liabilities for {bank_name} with access token {access_token[:4]}***...")
     try:
         request = LiabilitiesGetRequest(access_token=access_token)
         response = client.liabilities_get(request)
@@ -75,8 +76,8 @@ def fetch_liabilities(access_token, bank_name):
         logging.error(message)
 
 if __name__ == "__main__":
-    access_token = os.getenv("PLAID_ACCESS_TOKEN")
-    bank_name = 'default_bank'
+    access_token = os.getenv("ACCESS_TOKEN_TANGERINE")
+    bank_name = 'Tangerine'
     print(f"Starting liabilities fetch process for {bank_name}...")
     logging.info(f"Starting liabilities fetch process for {bank_name}...")
     if access_token:

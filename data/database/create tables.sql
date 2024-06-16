@@ -5,7 +5,7 @@ USE finance;
 DROP TABLE IF EXISTS file_import_tracker;
 CREATE TABLE file_import_tracker (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    file_name VARCHAR(255) NOT NULL,
+    file_name VARCHAR(255) NOT NULL UNIQUE,
     import_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     description TEXT
 );

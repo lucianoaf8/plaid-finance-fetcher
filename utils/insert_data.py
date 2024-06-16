@@ -2,11 +2,13 @@ import os
 import json
 import logging
 from datetime import datetime
-from importers import insert_transactions
-from importers import insert_liabilities
 from urllib.parse import urlparse
 import mysql.connector
 from dotenv import load_dotenv
+
+# Importing the insert functions from the importers module
+from importers import insert_transactions
+from importers import insert_liabilities
 
 # Load environment variables from .env file
 load_dotenv()

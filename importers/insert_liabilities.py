@@ -36,7 +36,22 @@ def get_db_connection():
         use_pure=True
     )
 
+def is_file_imported(file_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM file_import_tracker WHERE file_name = %s", (file_name,))
+    result = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return result > 0
+
 def insert_liabilities(data, bank_name, file_name):
+    if is_file_imported(file_name):
+        message = f"File {file_name} has already been imported. Skipping..."
+        print(message)
+        logging.info(message)
+        return
+    
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -53,13 +68,13 @@ def insert_liabilities(data, bank_name, file_name):
         tracker_id = cursor.lastrowid
 
         for credit in data['credit']:
-            account_id = credit['account_id']
+            transaction_id = credit['account_id']  # Assuming transaction_id is mapped from account_id or similar
             
-            # Check if account exists
-            cursor.execute("SELECT COUNT(*) FROM plaid_liabilities_credit WHERE account_id = %s", (account_id,))
-            account_exists = cursor.fetchone()[0] > 0
+            # Check if transaction exists
+            cursor.execute("SELECT COUNT(*) FROM plaid_liabilities_credit WHERE account_id = %s", (transaction_id,))
+            transaction_exists = cursor.fetchone()[0] > 0
 
-            if account_exists:
+            if transaction_exists:
                 # Move existing data to history table
                 cursor.execute("""
                     INSERT INTO plaid_liabilities_credit_history (account_id, is_overdue, last_payment_amount, last_payment_date, 
@@ -67,17 +82,17 @@ def insert_liabilities(data, bank_name, file_name):
                     SELECT account_id, is_overdue, last_payment_amount, last_payment_date, last_statement_issue_date, last_statement_balance, 
                         minimum_payment_amount, next_payment_due_date, %s 
                     FROM plaid_liabilities_credit WHERE account_id = %s
-                """, (tracker_id, account_id))
+                """, (tracker_id, transaction_id))
                 cursor.execute("""
                     INSERT INTO plaid_liabilities_credit_apr_history (account_id, apr_percentage, apr_type, balance_subject_to_apr, 
                         interest_charge_amount, file_import_id)
                     SELECT account_id, apr_percentage, apr_type, balance_subject_to_apr, interest_charge_amount, %s 
                     FROM plaid_liabilities_credit_apr WHERE account_id = %s
-                """, (tracker_id, account_id))
+                """, (tracker_id, transaction_id))
 
                 # Delete existing data
-                cursor.execute("DELETE FROM plaid_liabilities_credit_apr WHERE account_id = %s", (account_id,))
-                cursor.execute("DELETE FROM plaid_liabilities_credit WHERE account_id = %s", (account_id,))
+                cursor.execute("DELETE FROM plaid_liabilities_credit_apr WHERE account_id = %s", (transaction_id,))
+                cursor.execute("DELETE FROM plaid_liabilities_credit WHERE account_id = %s", (transaction_id,))
 
             is_overdue = credit['is_overdue']
             last_payment_amount = credit['last_payment_amount']
@@ -95,7 +110,7 @@ def insert_liabilities(data, bank_name, file_name):
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                account_id, is_overdue, last_payment_amount, last_payment_date,
+                transaction_id, is_overdue, last_payment_amount, last_payment_date,
                 last_statement_issue_date, last_statement_balance, 
                 minimum_payment_amount, next_payment_due_date, tracker_id
             ))
@@ -113,7 +128,7 @@ def insert_liabilities(data, bank_name, file_name):
                     )
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, (
-                    account_id, apr_percentage, apr_type, 
+                    transaction_id, apr_percentage, apr_type, 
                     balance_subject_to_apr, interest_charge_amount, tracker_id
                 ))
 
@@ -131,7 +146,7 @@ def insert_liabilities(data, bank_name, file_name):
 
 if __name__ == "__main__":
     # This part allows the script to be run independently
-    test_file_name = 'plaid_liabilities_Tangerine_20240616134414.json'
+    test_file_name = 'plaid_liabilities_Tangerine_20240616153614.json'
     test_bank_name = 'Tangerine'
     with open(f'data/fetched-files/{test_file_name}', 'r') as file:
         test_data = json.load(file)

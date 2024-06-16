@@ -3,7 +3,7 @@ from utils import setup
 from dotenv import load_dotenv
 from fetchers import plaid_transactions
 from fetchers import plaid_liabilities
-from importers import insert_data
+from utils import insert_data
 
 # Run the setup script to verify and create the project structure
 setup.verify_and_create_structure()

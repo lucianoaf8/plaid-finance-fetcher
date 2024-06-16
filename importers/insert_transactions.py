@@ -36,7 +36,22 @@ def get_db_connection():
         use_pure=True
     )
 
+def is_file_imported(file_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM file_import_tracker WHERE file_name = %s", (file_name,))
+    result = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return result > 0
+
 def insert_transactions(data, bank_name, file_name):
+    if is_file_imported(file_name):
+        message = f"File {file_name} has already been imported. Skipping..."
+        print(message)
+        logging.info(message)
+        return
+    
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -53,13 +68,13 @@ def insert_transactions(data, bank_name, file_name):
         tracker_id = cursor.lastrowid
 
         for transaction in data:
-            account_id = transaction['account_id']
-            
-            # Check if account exists
-            cursor.execute("SELECT COUNT(*) FROM plaid_transactions WHERE account_id = %s", (account_id,))
-            account_exists = cursor.fetchone()[0] > 0
+            transaction_id = transaction['transaction_id']
 
-            if account_exists:
+            # Check if transaction exists
+            cursor.execute("SELECT COUNT(*) FROM plaid_transactions WHERE transaction_id = %s", (transaction_id,))
+            transaction_exists = cursor.fetchone()[0] > 0
+
+            if transaction_exists:
                 # Move existing data to history table
                 cursor.execute("""
                     INSERT INTO plaid_transactions_history (
@@ -93,8 +108,8 @@ def insert_transactions(data, bank_name, file_name):
                         payment_meta_payee, payment_meta_by_order_of, payment_meta_payer, 
                         payment_meta_payment_method, payment_meta_payment_processor, 
                         payment_meta_reason, website, check_number, %s 
-                    FROM plaid_transactions WHERE account_id = %s
-                """, (tracker_id, account_id))
+                    FROM plaid_transactions WHERE transaction_id = %s
+                """, (tracker_id, transaction_id))
 
                 cursor.execute("""
                     INSERT INTO plaid_transaction_counterparties_history (
@@ -104,12 +119,12 @@ def insert_transactions(data, bank_name, file_name):
                     SELECT 
                         transaction_id, name, type, website, logo_url, 
                         confidence_level, entity_id, phone_number, %s 
-                    FROM plaid_transaction_counterparties WHERE transaction_id IN (SELECT transaction_id FROM plaid_transactions WHERE account_id = %s)
-                """, (tracker_id, account_id))
+                    FROM plaid_transaction_counterparties WHERE transaction_id = %s
+                """, (tracker_id, transaction_id))
 
                 # Delete existing data
-                cursor.execute("DELETE FROM plaid_transaction_counterparties WHERE transaction_id IN (SELECT transaction_id FROM plaid_transactions WHERE account_id = %s)", (account_id,))
-                cursor.execute("DELETE FROM plaid_transactions WHERE account_id = %s", (account_id,))
+                cursor.execute("DELETE FROM plaid_transaction_counterparties WHERE transaction_id = %s", (transaction_id,))
+                cursor.execute("DELETE FROM plaid_transactions WHERE transaction_id = %s", (transaction_id,))
 
             params = {
                 'account_id': transaction['account_id'], 
@@ -233,7 +248,7 @@ def insert_transactions(data, bank_name, file_name):
 
 if __name__ == "__main__":
     # This part allows the script to be run independently
-    test_file_name = 'plaid_transactions_Tangerine_20240616134413.json'
+    test_file_name = 'plaid_transactions_Tangerine_20240616153614.json'
     test_bank_name = 'Tangerine'
     with open(f'data/fetched-files/{test_file_name}', 'r') as file:
         test_data = json.load(file)
