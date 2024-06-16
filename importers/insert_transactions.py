@@ -248,7 +248,7 @@ def insert_transactions(data, bank_name, file_name):
 
 if __name__ == "__main__":
     # This part allows the script to be run independently
-    test_file_name = 'plaid_transactions_Tangerine_20240616153614.json'
+    test_file_name = 'plaid_transactions_Tangerine_20240616160628.json'
     test_bank_name = 'Tangerine'
     with open(f'data/fetched-files/{test_file_name}', 'r') as file:
         test_data = json.load(file)

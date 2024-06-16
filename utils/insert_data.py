@@ -1,12 +1,15 @@
+import sys
 import os
-import json
-import logging
 from datetime import datetime
 from urllib.parse import urlparse
+import json
+import logging
 import mysql.connector
 from dotenv import load_dotenv
 
-# Importing the insert functions from the importers module
+# Adjust the import path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from importers import insert_transactions
 from importers import insert_liabilities
 
