@@ -36,7 +36,22 @@ def get_db_connection():
         use_pure=True
     )
 
+def is_file_imported(file_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM file_import_tracker WHERE file_name = %s", (file_name,))
+    result = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return result > 0
+
 def insert_liabilities(data, bank_name, file_name):
+    if is_file_imported(file_name):
+        message = f"File {file_name} has already been imported. Skipping..."
+        print(message)
+        logging.info(message)
+        return
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor()

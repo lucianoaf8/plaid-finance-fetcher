@@ -1,2 +1,4 @@
 *.env
 fetched-files/*
+logs/*
+.idea/
