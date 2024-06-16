@@ -1,4 +1,9 @@
 import os
+from utils import setup
+
+# Run the setup script to verify and create the project structure
+setup.verify_and_create_structure()
+
 from dotenv import load_dotenv
 from fetchers import plaid_transactions
 from fetchers import plaid_liabilities

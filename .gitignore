@@ -1,5 +1,5 @@
 *.env
-fetched-files/*
-logs/*
+fetched-files/
+logs/
 __pycache__/
 .idea/
