@@ -28,7 +28,7 @@ def analyze_transactions(file_path, output_file_path):
 
 if __name__ == "__main__":
     # File paths
-    input_file_path = r'data\fetched-files\plaid_transactions_default_bank_20240616214148.json'
+    input_file_path = r'data\fetched-files\plaid_transactions_default_bank_20240616223137.json'
     output_file_path = 'utils/file_report.xlsx'
 
     # Analyze transactions and generate the report
