@@ -253,5 +253,10 @@ if __name__ == "__main__":
         if file_name.startswith('plaid_transactions_') and file_name.endswith('.json'):
             bank_name = file_name.split('_')[2]  # Assuming the file name format is consistent
             with open(os.path.join(fetched_files_dir, file_name), 'r') as file:
-                transactions_data = json.load(file)
+                try:
+                    transactions_data = json.load(file)
+                except json.JSONDecodeError as e:
+                    logging.error(f"Error decoding JSON from file {file_name}: {e}")
+                    print(f"Error decoding JSON from file {file_name}: {e}")
+                    continue
             insert_transactions(transactions_data, bank_name, file_name)
