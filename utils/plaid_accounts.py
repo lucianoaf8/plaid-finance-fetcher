@@ -14,7 +14,7 @@ load_dotenv()
 
 # Fetch access tokens for multiple accounts from environment variables
 access_tokens = {
-    # "CIBC": os.getenv("ACCESS_TOKEN_CIBC"),
+    "CIBC": os.getenv("ACCESS_TOKEN_CIBC"),
     "Tangerine": os.getenv("ACCESS_TOKEN_TANGERINE"),
     # "Triangle": os.getenv("ACCESS_TOKEN_TRIANGLE"),
     # "MBNA": os.getenv("ACCESS_TOKEN_MBNA")

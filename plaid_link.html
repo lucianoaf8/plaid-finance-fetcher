@@ -11,7 +11,7 @@
   <script>
     document.getElementById('linkButton').onclick = function () {
       var linkHandler = Plaid.create({
-        token: 'your_link_token_here', // Replace with the link token generated in Step 1
+        token: 'link-production-7421c03a-07be-4c05-8e0e-f821809f87ca', // Replace with the link token generated in Step 1
         onSuccess: function(public_token, metadata) {
           console.log('Public Token:', public_token);
           // Send the public_token to your server to exchange it for an access token

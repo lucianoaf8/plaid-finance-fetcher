@@ -6,6 +6,7 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
+from plaid.exceptions import ApiException
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,7 +21,7 @@ PLAID_ENV_URLS = {
     "development": "https://development.plaid.com",
     "production": "https://production.plaid.com"
 }
-PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://development.plaid.com")  # Default to development
+PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://production.plaid.com")  # Default to development
 
 # Configure Plaid client
 configuration = configuration.Configuration(
@@ -48,5 +49,5 @@ if __name__ == "__main__":
     try:
         link_token = create_link_token()
         print(f"Link Token: {link_token}")
-    except plaid.ApiException as e:
+    except ApiException as e:
         print(f"An error occurred: {e}")
