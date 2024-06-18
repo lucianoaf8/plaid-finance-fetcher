@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Plaid Link</title>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+</head>
+<body>
+  <button id="linkButton">Link Bank Account</button>
+  <p>Access Token: <span id="accessToken"></span></p>
+  <script>
+    document.getElementById('linkButton').onclick = function () {
+      var linkHandler = Plaid.create({
+        token: 'link-production-93e5c877-918f-4ff0-b8ac-0fa680ed2d90', // Replace with the link token generated in Step 1
+        onSuccess: function(public_token, metadata) {
+          console.log('Public Token:', public_token);
+          // Send the public_token to your server to exchange it for an access token
+          fetch('http://127.0.0.1:5000/exchange_public_token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ public_token: public_token }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.access_token) {
+              document.getElementById('accessToken').innerText = data.access_token;
+              console.log('Access Token:', data.access_token);
+            } else {
+              console.error('Error:', data.error);
+              document.getElementById('accessToken').innerText = 'Error: ' + data.error;
+            }
+          })
+          .catch(error => {
+            console.error('Fetch Error:', error);
+          });
+        },
+        onExit: function(err, metadata) {
+          if (err != null) {
+            console.error('Exit with error:', err);
+          }
+        },
+      });
+
+      linkHandler.open();
+    };
+  </script>
+</body>
+</html>

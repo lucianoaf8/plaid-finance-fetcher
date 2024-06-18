@@ -1,0 +1,9 @@
+*.env
+data/fetched-files/
+logs/
+__pycache__/
+fetchers/__pycache__/
+utils/__pycache__/
+.idea/
+importers/__init__.py
+importers/__pycache__
