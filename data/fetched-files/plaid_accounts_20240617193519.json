@@ -1,0 +1,52 @@
+[
+    {
+        "account_id": "Xxa78QpMVncM1ndM40kzc5ED84ngYDTzg5gxX",
+        "name": "Line of Credit",
+        "official_name": "Tangerine Line of Credit",
+        "type": "loan",
+        "subtype": "loan",
+        "bank_name": "Tangerine",
+        "access_token": "access-production-251b17bb-7752-41da-8e58-62cb92a97edb",
+        "last_fetch_date": null
+    },
+    {
+        "account_id": "QARyJbpQZXhb3yVborR8h0gnXoxk8nH91v1Lb",
+        "name": "Tangerine Chequing Account",
+        "official_name": "Tangerine Chequing Account",
+        "type": "depository",
+        "subtype": "checking",
+        "bank_name": "Tangerine",
+        "access_token": "access-production-251b17bb-7752-41da-8e58-62cb92a97edb",
+        "last_fetch_date": null
+    },
+    {
+        "account_id": "nBp54mNDkjTq6gjqvVN1SjkbQ4KYxbUjZgZ37",
+        "name": "Brazil",
+        "official_name": "Tangerine Savings Account",
+        "type": "depository",
+        "subtype": "savings",
+        "bank_name": "Tangerine",
+        "access_token": "access-production-251b17bb-7752-41da-8e58-62cb92a97edb",
+        "last_fetch_date": null
+    },
+    {
+        "account_id": "pypo4qbdv8SdJ3ndxR6YhDvzy01wXzfAogoyD",
+        "name": "Emergency Fund",
+        "official_name": "Tangerine Tax-Free Savings Account",
+        "type": "investment",
+        "subtype": "tfsa",
+        "bank_name": "Tangerine",
+        "access_token": "access-production-251b17bb-7752-41da-8e58-62cb92a97edb",
+        "last_fetch_date": null
+    },
+    {
+        "account_id": "NyR4J8pQxnSk5VEkLjJpSv10kxa9P0HyD9DO8",
+        "name": "5360 xxxx xxxx 8342",
+        "official_name": "Tangerine World Mastercard",
+        "type": "credit",
+        "subtype": "credit card",
+        "bank_name": "Tangerine",
+        "access_token": "access-production-251b17bb-7752-41da-8e58-62cb92a97edb",
+        "last_fetch_date": null
+    }
+]
