@@ -11,7 +11,11 @@
   <script>
     document.getElementById('linkButton').onclick = function () {
       var linkHandler = Plaid.create({
+<<<<<<< HEAD
         token: 'link-production-93e5c877-918f-4ff0-b8ac-0fa680ed2d90', // Replace with the link token generated in Step 1
+=======
+        token: 'link-production-7421c03a-07be-4c05-8e0e-f821809f87ca', // Replace with the link token generated in Step 1
+>>>>>>> c16378057ecc26aa3488592e60562053a224e873
         onSuccess: function(public_token, metadata) {
           console.log('Public Token:', public_token);
           // Send the public_token to your server to exchange it for an access token

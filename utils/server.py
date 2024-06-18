@@ -17,7 +17,11 @@ PLAID_ENV_URLS = {
     "development": "https://development.plaid.com",
     "production": "https://production.plaid.com"
 }
+<<<<<<< HEAD
 PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://production.plaid.com")
+=======
+PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://development.plaid.com")
+>>>>>>> c16378057ecc26aa3488592e60562053a224e873
 
 configuration = configuration.Configuration(
     host=PLAID_HOST,
