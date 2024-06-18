@@ -60,7 +60,7 @@ def search_institution(query):
 
 # Example usage
 if __name__ == "__main__":
-    institution_name = "Canadian Tire Bank"
+    institution_name = "CIBC"
     print(f"Searching institution details for: {institution_name}")
     institution_details = search_institution(institution_name)
     if institution_details:

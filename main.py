@@ -9,6 +9,7 @@ import fetchers.plaid_transactions as fetch_transactions
 import fetchers.plaid_liabilities as fetch_liabilities
 import importers.insert_transactions as insert_transactions
 import importers.insert_liabilities as insert_liabilities
+from utils.plaid_accounts import fetch_account_info, store_accounts_in_db, get_access_tokens_from_db
 
 # Load environment variables from .env file
 load_dotenv()
@@ -36,22 +37,36 @@ dbconfig = {
 def get_db_connection():
     return mysql.connector.connect(**dbconfig)
 
-def get_access_tokens_from_db():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT DISTINCT access_token, bank_name FROM plaid_accounts where bank_name = 'CIBC'")
-    tokens = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return tokens
-
 if __name__ == "__main__":
-    print("Starting fetch and import process...")
-    logging.info("Starting fetch and import process...")
+    print("Starting account update process...")
+    logging.info("Starting account update process...")
+
+    # Update account information first
     tokens = get_access_tokens_from_db()
     for token in tokens:
         access_token = token['access_token']
-        bank_name = token['bank_name']
+        institution_name = token['institution_name']
+        institution_id = token['institution_id']
+        
+        if access_token:
+            accounts = fetch_account_info(access_token)
+            if accounts:
+                store_accounts_in_db(accounts, access_token, institution_name, institution_id)
+        else:
+            message = f"Access token for {institution_name} is missing."
+            print(message)
+            logging.error(message)
+    
+    print("Account update process completed.")
+    logging.info("Account update process completed.")
+    
+    print("Starting fetch and import process...")
+    logging.info("Starting fetch and import process...")
+    
+    tokens = get_access_tokens_from_db()
+    for token in tokens:
+        access_token = token['access_token']
+        bank_name = token['institution_name']
 
         # Fetch transactions
         transactions_file = fetch_transactions.fetch_transactions(access_token, bank_name)
