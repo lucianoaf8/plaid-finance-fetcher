@@ -39,7 +39,7 @@ def get_db_connection():
 def get_access_tokens_from_db():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT DISTINCT access_token, bank_name FROM plaid_accounts")
+    cursor.execute("SELECT DISTINCT access_token, bank_name FROM plaid_accounts where bank_name = 'CIBC'")
     tokens = cursor.fetchall()
     cursor.close()
     conn.close()

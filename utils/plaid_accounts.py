@@ -19,8 +19,6 @@ load_dotenv()
 access_tokens = {
     "CIBC": os.getenv("ACCESS_TOKEN_CIBC"),
     "Tangerine": os.getenv("ACCESS_TOKEN_TANGERINE"),
-    # "Triangle": os.getenv("ACCESS_TOKEN_TRIANGLE"),
-    # "MBNA": os.getenv("ACCESS_TOKEN_MBNA")
 }
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")

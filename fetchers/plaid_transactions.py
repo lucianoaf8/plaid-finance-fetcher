@@ -7,7 +7,6 @@ from plaid.api import plaid_api
 from plaid import configuration, api_client
 from plaid.api_client import ApiException
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
-from plaid import configuration, api_client
 import time
 
 # Load environment variables from .env file
