@@ -1,9 +1,28 @@
+# Environment variables
 .env
+
+# Data files
 data/fetched-files/
+
+# Log files
 logs/
+
+# Python cache directories
 __pycache__/
-fetchers/__pycache__/
-utils/__pycache__/
+*.pyc
+*.pyo
+
+# IDE and editor settings
 .idea/
-importers/__init__.py
-importers/__pycache__
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Excel files
+*.xlsx
+
+# Other backup and temporary files
+*.bak
+*.tmp
