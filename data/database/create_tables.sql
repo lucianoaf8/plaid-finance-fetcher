@@ -18,12 +18,12 @@ CREATE TABLE plaid_accounts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE `file_import_tracker` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `file_name` VARCHAR(255) NOT NULL,
-    `description` TEXT,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX (`file_name`)
+CREATE TABLE file_import_tracker (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (file_name)
 );
 
 CREATE TABLE finance.plaid_liabilities_credit (
