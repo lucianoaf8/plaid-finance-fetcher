@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from plaid.api import plaid_api
 from plaid import configuration, api_client
+from plaid.api_client import ApiException
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 
 # Load environment variables from .env file
@@ -44,5 +45,5 @@ if __name__ == "__main__":
     try:
         access_token = exchange_public_token(public_token)
         print(f"Access Token: {access_token}")
-    except plaid.ApiException as e:
+    except ApiException as e:
         print(f"An error occurred: {e}")

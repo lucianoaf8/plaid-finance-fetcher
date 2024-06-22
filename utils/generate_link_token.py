@@ -4,9 +4,11 @@ from plaid.api import plaid_api
 from plaid import configuration, api_client
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.link_token_create_request_user_address import LinkTokenCreateRequestUserAddress
 from plaid.model.country_code import CountryCode
 from plaid.model.products import Products
 from plaid.exceptions import ApiException
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -37,13 +39,15 @@ client = plaid_api.PlaidApi(api_client)
 def create_link_token():
     request = LinkTokenCreateRequest(
         user=LinkTokenCreateRequestUser(client_user_id='unique_static_user_id'),
-        client_name='Your App',
-        products=[Products('transactions'), Products('liabilities')],
+        client_name='finance-fetcher',
+        products=[Products('transactions')],
         country_codes=[CountryCode('CA')],
         language='en'
     )
+    print(request)
     response = client.link_token_create(request)
     return response['link_token']
+
 
 if __name__ == "__main__":
     try:
@@ -51,3 +55,4 @@ if __name__ == "__main__":
         print(f"Link Token: {link_token}")
     except ApiException as e:
         print(f"An error occurred: {e}")
+

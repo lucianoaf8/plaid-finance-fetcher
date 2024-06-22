@@ -1,61 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Plaid Link Example</title>
-    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <meta charset="UTF-8">
+  <title>Plaid Link</title>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 </head>
 <body>
-    <button id="linkButton">Connect to Bank</button>
-
-    <script>
-        async function getLinkToken() {
-            const response = await fetch('http://127.0.0.1:5000/create_link_token', { method: 'POST' });
-            if (!response.ok) {
-                console.error('Error fetching link token:', response.statusText);
-                return null;
+  <button id="linkButton">Link Bank Account</button>
+  <p>Access Token: <span id="accessToken"></span></p>
+  <script>
+    document.getElementById('linkButton').onclick = function () {
+      var linkHandler = Plaid.create({
+        token: 'link-production-e335af20-a5bd-4a41-b9a0-19e4b49b1567', // Replace with the link token generated in Step 1
+        onSuccess: function(public_token, metadata) {
+          console.log('Public Token:', public_token);
+          // Send the public_token to your server to exchange it for an access token
+          fetch('http://127.0.0.1:5000/exchange_public_token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ public_token: public_token }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.access_token) {
+              document.getElementById('accessToken').innerText = data.access_token;
+              console.log('Access Token:', data.access_token);
+            } else {
+              console.error('Error:', data.error);
+              document.getElementById('accessToken').innerText = 'Error: ' + data.error;
             }
-            const data = await response.json();
-            return data.link_token;
-        }
+          })
+          .catch(error => {
+            console.error('Fetch Error:', error);
+          });
+        },
+        onExit: function(err, metadata) {
+          if (err != null) {
+            console.error('Exit with error:', err);
+          }
+        },
+      });
 
-        async function initializePlaidLink() {
-            const linkToken = await getLinkToken();
-            if (!linkToken) {
-                console.error('Link token not found');
-                return;
-            }
-            var linkHandler = Plaid.create({
-                token: linkToken,
-                onSuccess: function(public_token, metadata) {
-                    // Send the public_token to your server
-                    fetch('http://127.0.0.1:5000/get_access_token', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ public_token: public_token })
-                    }).then(response => response.json())
-                      .then(data => {
-                          console.log('Access Token:', data.access_token);
-                      }).catch(error => {
-                          console.error('Error getting access token:', error);
-                      });
-                },
-                onExit: function(err, metadata) {
-                    // The user exited the Link flow.
-                    if (err != null) {
-                        // The user encountered a Plaid API error prior to exiting.
-                        console.error('Plaid API error:', err);
-                    }
-                }
-            });
-
-            document.getElementById('linkButton').onclick = function() {
-                linkHandler.open();
-            };
-        }
-
-        initializePlaidLink();
-    </script>
+      linkHandler.open();
+    };
+  </script>
 </body>
 </html>

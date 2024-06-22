@@ -1,24 +1,17 @@
-from flask import Flask, request, jsonify
 import os
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from plaid.api import plaid_api
 from plaid import configuration, api_client
-from plaid.model.link_token_create_request import LinkTokenCreateRequest
-from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.api_client import ApiException
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
-from plaid.model.country_code import CountryCode
-from plaid.model.products import Products
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-
-# Load environment variables
 load_dotenv()
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
-PLAID_ENV = 'production'  # Use production environment
+PLAID_ENV = os.getenv("PLAID_ENV", "development")
 
 PLAID_ENV_URLS = {
     "sandbox": "https://sandbox.plaid.com",
@@ -37,40 +30,29 @@ configuration = configuration.Configuration(
 api_client = api_client.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
-@app.route('/create_link_token', methods=['POST'])
-def create_link_token():
+@app.route('/exchange_public_token', methods=['POST'])
+def exchange_public_token():
+    public_token = request.json.get('public_token')
+    print(f'Received public token: {public_token}')
+    if not public_token:
+        return jsonify({'error': 'public_token is required'}), 400
+
     try:
-        request = LinkTokenCreateRequest(
-            products=[Products('auth'), Products('transactions'), Products('liabilities')],  # Add the products you need
-            client_name='Your App Name',
-            country_codes=[CountryCode('CA')],  # Canadian institutions
-            language='en',
-            user=LinkTokenCreateRequestUser(
-                client_user_id='unique-user-id'  # Replace with a unique identifier for the user
-            )
+        request = ItemPublicTokenExchangeRequest(
+            client_id=PLAID_CLIENT_ID,
+            secret=PLAID_SECRET,
+            public_token=public_token
         )
-        response = client.link_token_create(request)
-        link_token = response['link_token']
-        return jsonify({'link_token': link_token})
-    except Exception as e:
-        error_message = str(e)
-        print(f"Error creating link token: {error_message}")  # Log the error message
-        return jsonify({'error': error_message}), 400
-
-
-
-@app.route('/get_access_token', methods=['POST'])
-def get_access_token():
-    public_token = request.json['public_token']
-    try:
-        exchange_request = ItemPublicTokenExchangeRequest(public_token=public_token)
-        exchange_response = client.item_public_token_exchange(exchange_request)
-        access_token = exchange_response['access_token']
+        response = client.item_public_token_exchange(request)
+        access_token = response['access_token']
+        print(f'Generated access token: {access_token}')
         return jsonify({'access_token': access_token})
+    except ApiException as e:
+        print(f'API Exception: {str(e)}')
+        return jsonify({'error': str(e)}), 500
     except Exception as e:
-        error_message = str(e)
-        print(f"Error exchanging public token: {error_message}")  # Log the error message
-        return jsonify({'error': error_message}), 400
+        print(f'Unexpected Exception: {str(e)}')
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=5000, debug=True)

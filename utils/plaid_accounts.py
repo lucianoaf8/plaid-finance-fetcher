@@ -142,6 +142,8 @@ def get_access_tokens_from_db():
 
 if __name__ == "__main__":
     new_account_token = os.getenv("NEW_ACCOUNT_TOKEN")
+    new_institution_name = os.getenv("NEW_BANK_NAME")
+    new_institution_id = os.getenv("NEW_BANK_ID")
     
     print(f"Starting accounts fetch process...")
     logging.info(f"Starting accounts fetch process...")
@@ -163,8 +165,6 @@ if __name__ == "__main__":
             logging.error(message)
     
     if new_account_token:
-        institution_name = "NEW_BANK_NAME"  # Update accordingly
-        institution_id = "NEW_BANK_ID"  # Fetch or set the correct institution ID
         accounts = fetch_account_info(new_account_token)
         if accounts:
             store_accounts_in_db(accounts, new_account_token, institution_name, institution_id)
