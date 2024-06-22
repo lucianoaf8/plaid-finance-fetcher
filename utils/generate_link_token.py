@@ -44,7 +44,7 @@ def create_link_token():
         country_codes=[CountryCode('CA')],
         language='en'
     )
-    print(request)
+    # print(request)
     response = client.link_token_create(request)
     return response['link_token']
 

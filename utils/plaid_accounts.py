@@ -167,7 +167,7 @@ if __name__ == "__main__":
     if new_account_token:
         accounts = fetch_account_info(new_account_token)
         if accounts:
-            store_accounts_in_db(accounts, new_account_token, institution_name, institution_id)
+            store_accounts_in_db(accounts, new_account_token, new_institution_name,new_institution_id)
     
     print("Accounts fetch process completed.")
     logging.info("Accounts fetch process completed.")
