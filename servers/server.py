@@ -109,7 +109,7 @@ def create_update_token():
 @app.route('/')
 def index():
     logging.info("Serving the main HTML page.")
-    return send_from_directory('static', 'plaid_link.html')
+    return send_from_directory('../static', 'plaid_link.html')
 
 if __name__ == '__main__':
     logging.info("Starting Flask server.")

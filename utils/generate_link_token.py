@@ -40,10 +40,9 @@ def create_link_token():
     request = LinkTokenCreateRequest(
         user=LinkTokenCreateRequestUser(client_user_id='unique_static_user_id'),
         client_name='finance-fetcher',
-        products=[Products('transactions')],
+        products=[Products('transactions'), Products('assets')],
         country_codes=[CountryCode('CA')],
         language='en',
-        # access_token='access-production-ad9d7bd3-f7bb-42f3-bad0-cb9b178b5622'
     )
 
     # print(request)

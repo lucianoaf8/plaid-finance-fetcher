@@ -15,7 +15,7 @@
     document.getElementById('linkButton').onclick = function () {
       console.log('Link Bank Account button clicked.');
       var linkHandler = Plaid.create({
-        token: 'link-production-5352b6fd-8c00-495a-ba67-d6010d20380a', // Replace with the new link token you generated
+        token: 'link-production-b19add64-1cbf-470a-a79d-5655b98c725b', // Replace with the new link token you generated
         onSuccess: function(public_token, metadata) {
           console.log('Link success. Public Token:', public_token);
           console.log('Metadata:', metadata);
