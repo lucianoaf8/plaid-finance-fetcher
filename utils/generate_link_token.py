@@ -15,7 +15,7 @@ load_dotenv()
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
-PLAID_ENV = os.getenv("PLAID_ENV", "development")  # Set default to development
+PLAID_ENV = os.getenv("PLAID_ENV", "production")
 
 # Determine the Plaid environment URL
 PLAID_ENV_URLS = {

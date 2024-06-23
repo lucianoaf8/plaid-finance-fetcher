@@ -5,7 +5,7 @@ from mysql.connector import pooling
 from urllib.parse import urlparse
 from datetime import datetime
 from dotenv import load_dotenv
-import pandas as pd
+import csv
 
 # Load environment variables from .env file
 load_dotenv()
@@ -70,34 +70,45 @@ def insert_triangle_data(file_path, file_name):
 
         tracker_id = cursor.lastrowid
 
-        # Load CSV data
-        df = pd.read_csv(file_path)
+        # Read the CSV file
+        with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            
+            # Skip header rows
+            next(reader)  # Skip 'MY ACCOUNT TRANSACTIONS'
+            next(reader)  # Skip summary headers
+            summary_row = next(reader)  # Read summary row
+            next(reader)  # Skip transaction headers
 
-        # Insert statement summary
-        statement_data = df.iloc[0]
-        cursor.execute("""
-            INSERT INTO triangle_card_statements (
-                start_date, end_date, current_balance, available_credit, file_import_id
-            ) VALUES (%s, %s, %s, %s, %s)
-        """, (
-            statement_data['Start Date'], statement_data['End Date'],
-            statement_data['Current Balance'], statement_data['Available Credit'],
-            tracker_id
-        ))
+            # Extract summary data
+            start_date, end_date, current_balance, available_credit = summary_row
 
-        statement_id = cursor.lastrowid
-
-        # Insert transactions
-        for index, row in df[1:].iterrows():
             cursor.execute("""
-                INSERT INTO triangle_card_transactions (
-                    ref, transaction_date, posted_date, type, description, category, amount, 
-                    statement_id, file_import_id
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO triangle_card_statements (
+                    start_date, end_date, current_balance, available_credit, file_import_id
+                ) VALUES (%s, %s, %s, %s, %s)
             """, (
-                row['REF'], row['TRANSACTION DATE'], row['POSTED DATE'], row['TYPE'], 
-                row['DESCRIPTION'], row['Category'], row['AMOUNT'], statement_id, tracker_id
+                start_date, end_date, current_balance, available_credit, tracker_id
             ))
+
+            statement_id = cursor.lastrowid
+
+            # Process transactions
+            for transaction_row in reader:
+                if len(transaction_row) < 7:
+                    continue
+
+                ref, transaction_date, posted_date, type_, description, category, amount = transaction_row
+
+                cursor.execute("""
+                    INSERT INTO triangle_card_transactions (
+                        ref, transaction_date, posted_date, type, description, category, amount, 
+                        statement_id, file_import_id
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    ref, transaction_date, posted_date, type_, description, category, amount, 
+                    statement_id, tracker_id
+                ))
 
         conn.commit()
         message = f"Successfully inserted Triangle card data from {file_name}"
@@ -113,7 +124,7 @@ def insert_triangle_data(file_path, file_name):
         conn.close()
 
 if __name__ == "__main__":
-    fetched_files_dir = './data/triangle-files'
+    fetched_files_dir = 'data/triangle-files'
     for file_name in os.listdir(fetched_files_dir):
         if file_name.endswith('.csv'):
             file_path = os.path.join(fetched_files_dir, file_name)
