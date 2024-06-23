@@ -10,11 +10,15 @@
   <button id="updateButton">Update Bank Account</button>
   <p>Access Token: <span id="accessToken"></span></p>
   <script>
+    console.log('Page loaded and script initialized.');
+
     document.getElementById('linkButton').onclick = function () {
+      console.log('Link Bank Account button clicked.');
       var linkHandler = Plaid.create({
-        token: 'new-link-token-here', // Replace with the new link token you generated
+        token: 'link-production-5352b6fd-8c00-495a-ba67-d6010d20380a', // Replace with the new link token you generated
         onSuccess: function(public_token, metadata) {
-          console.log('Public Token:', public_token);
+          console.log('Link success. Public Token:', public_token);
+          console.log('Metadata:', metadata);
           // Send the public_token to your server to exchange it for an access token
           fetch('http://127.0.0.1:5000/exchange_public_token', {
             method: 'POST',
@@ -25,6 +29,7 @@
           })
           .then(response => response.json())
           .then(data => {
+            console.log('Exchange Public Token response:', data);
             if (data.access_token) {
               document.getElementById('accessToken').innerText = data.access_token;
               console.log('Access Token:', data.access_token);
@@ -40,6 +45,8 @@
         onExit: function(err, metadata) {
           if (err != null) {
             console.error('Exit with error:', err);
+          } else {
+            console.log('User exited Plaid Link. Metadata:', metadata);
           }
         },
       });
@@ -48,12 +55,15 @@
     };
 
     document.getElementById('updateButton').onclick = function () {
+      console.log('Update Bank Account button clicked.');
       var accessToken = document.getElementById('accessToken').innerText;
       if (!accessToken || accessToken.startsWith('Error')) {
+        console.warn('No valid access token available.');
         accessToken = prompt('No valid access token available. Please enter your access token:');
       }
 
       if (accessToken && !accessToken.startsWith('Error')) {
+        console.log('Using Access Token:', accessToken);
         fetch('http://127.0.0.1:5000/create_update_token', {
           method: 'POST',
           headers: {
@@ -63,11 +73,13 @@
         })
         .then(response => response.json())
         .then(data => {
+          console.log('Create Update Token response:', data);
           if (data.update_token) {
             var linkHandler = Plaid.create({
               token: data.update_token, // Use the update token instead of link token
               onSuccess: function(public_token, metadata) {
-                console.log('Public Token:', public_token);
+                console.log('Update success. Public Token:', public_token);
+                console.log('Metadata:', metadata);
                 // Send the public_token to your server to exchange it for an access token
                 fetch('http://127.0.0.1:5000/exchange_public_token', {
                   method: 'POST',
@@ -78,6 +90,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                  console.log('Exchange Public Token (update) response:', data);
                   if (data.access_token) {
                     document.getElementById('accessToken').innerText = data.access_token;
                     console.log('Access Token:', data.access_token);
@@ -93,6 +106,8 @@
               onExit: function(err, metadata) {
                 if (err != null) {
                   console.error('Exit with error:', err);
+                } else {
+                  console.log('User exited Plaid Link. Metadata:', metadata);
                 }
               },
             });

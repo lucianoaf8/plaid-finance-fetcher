@@ -1,6 +1,6 @@
 USE finance;
 
-# Main tables
+# Plaid tables
 CREATE TABLE plaid_accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     account_id VARCHAR(255) UNIQUE NOT NULL,
@@ -121,7 +121,7 @@ CREATE TABLE plaid_transaction_counterparties (
     FOREIGN KEY (transaction_id) REFERENCES plaid_transactions(transaction_id) ON DELETE CASCADE
 );
 
-# History tables
+# History plaid tables
 CREATE TABLE finance.plaid_liabilities_credit_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     account_id VARCHAR(255) NOT NULL,
@@ -212,4 +212,34 @@ CREATE TABLE plaid_transaction_counterparties_history (
     phone_number VARCHAR(50),
     file_import_id INT,
     FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE
+);
+
+# Triangle
+CREATE TABLE triangle_card_statements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    current_balance DECIMAL(10, 2) NOT NULL,
+    available_credit DECIMAL(10, 2) NOT NULL,
+    file_import_id INT,
+    FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE triangle_card_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ref VARCHAR(255) NOT NULL,
+    transaction_date DATE NOT NULL,
+    posted_date DATE NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    category VARCHAR(100),
+    amount DECIMAL(10, 2) NOT NULL,
+    statement_id INT,
+    FOREIGN KEY (statement_id) REFERENCES triangle_card_statements(id) ON DELETE CASCADE,
+    file_import_id INT,
+    FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

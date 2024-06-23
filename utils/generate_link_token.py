@@ -42,8 +42,10 @@ def create_link_token():
         client_name='finance-fetcher',
         products=[Products('transactions')],
         country_codes=[CountryCode('CA')],
-        language='en'
+        language='en',
+        # access_token='access-production-ad9d7bd3-f7bb-42f3-bad0-cb9b178b5622'
     )
+
     # print(request)
     response = client.link_token_create(request)
     return response['link_token']

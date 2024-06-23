@@ -15,7 +15,21 @@ app = Flask(__name__)
 load_dotenv()
 
 # Setup logging
-logging.basicConfig(level=logging.DEBUG)
+log_dir = 'logs'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+logging.basicConfig(
+    filename=os.path.join(log_dir, 'server.log'),
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
+
+console = logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s %(levelname)s:%(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
@@ -41,10 +55,12 @@ client = plaid_api.PlaidApi(api_client)
 @app.route('/exchange_public_token', methods=['POST'])
 def exchange_public_token_endpoint():
     try:
+        logging.info("Starting public token exchange process.")
         public_token = request.json.get('public_token')
         logging.debug(f'Received public token: {public_token}')
         
         if not public_token:
+            logging.error("Public token is required but not provided.")
             return jsonify({'error': 'public_token is required'}), 400
 
         exchange_request = ItemPublicTokenExchangeRequest(
@@ -64,17 +80,18 @@ def exchange_public_token_endpoint():
 @app.route('/create_update_token', methods=['POST'])
 def create_update_token():
     try:
+        logging.info("Starting update token creation process.")
         access_token = request.json.get('access_token')
         logging.debug(f'Received access token: {access_token}')
         
         if not access_token:
+            logging.error("Access token is required but not provided.")
             return jsonify({'error': 'access_token is required'}), 400
 
         update_request_data = LinkTokenCreateRequest(
             user=LinkTokenCreateRequestUser(client_user_id='unique_static_user_id'),
-            client_name='Your App Name',
-            products=[Products('transactions')],
-            country_codes=[CountryCode('US')],
+            client_name='finance-fetcher',
+            country_codes=[CountryCode('CA')],
             language='en',
             access_token=access_token
         )
@@ -91,7 +108,9 @@ def create_update_token():
 
 @app.route('/')
 def index():
+    logging.info("Serving the main HTML page.")
     return send_from_directory('static', 'plaid_link.html')
 
 if __name__ == '__main__':
+    logging.info("Starting Flask server.")
     app.run(port=5000, debug=True)

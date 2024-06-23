@@ -3,6 +3,7 @@
 
 # Data files
 data/fetched-files/
+data/
 
 # Log files
 logs/
