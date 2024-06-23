@@ -6,7 +6,10 @@ def verify_and_create_structure():
         'data/database',
         'logs',
         'fetchers',
-        'utils'
+        'utils',
+        'importers',
+        'static',
+        'servers'
     ]
     
     for directory in required_dirs:
