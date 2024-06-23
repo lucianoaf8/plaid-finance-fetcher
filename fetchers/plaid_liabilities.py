@@ -96,8 +96,8 @@ def fetch_liabilities(access_token, bank_name):
         return None
 
 if __name__ == "__main__": 
-    access_token = os.getenv("ACCESS_TOKEN_TANGERINE")
-    bank_name = 'Tangerine'
+    access_token = os.getenv("NEW_ACCOUNT_TOKEN")
+    bank_name = os.getenv("NEW_BANK_NAME")
     print(f"Starting liabilities fetch process for {bank_name}...")
     logging.info(f"Starting liabilities fetch process for {bank_name}...")
     if access_token:

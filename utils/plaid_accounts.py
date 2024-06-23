@@ -8,7 +8,6 @@ from plaid.api_client import ApiException
 from plaid.model.accounts_get_request import AccountsGetRequest
 from datetime import datetime
 from urllib.parse import urlparse
-import mysql.connector
 from mysql.connector import pooling
 
 # Load environment variables from .env file

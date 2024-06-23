@@ -101,13 +101,10 @@ def fetch_transactions(access_token, bank_name, cursor=""):
     return filename
 
 if __name__ == "__main__":
-    access_token = os.getenv("PLAID_ACCESS_TOKEN")
-    bank_name = 'default_bank'
-    last_fetch_date = os.getenv("LAST_FETCH_DATE", (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'))
-    start_date = last_fetch_date
-    end_date = datetime.now().strftime('%Y-%m-%d')
-    print(f"Starting transactions fetch process for {bank_name} from {start_date} to {end_date}...")
-    logging.info(f"Starting transactions fetch process for {bank_name} from {start_date} to {end_date}...")
+    access_token = os.getenv("NEW_ACCOUNT_TOKEN")
+    bank_name = os.getenv("NEW_BANK_NAME")
+    print(f"Starting transactions fetch process for {bank_name}...")
+    logging.info(f"Starting transactions fetch process for {bank_name}...")
     if access_token:
         fetch_transactions(access_token, bank_name)
     else:
