@@ -68,8 +68,6 @@ def exchange_public_token_endpoint():
         )
         response = client.item_public_token_exchange(exchange_request)
         access_token = response['access_token']
-        logging.debug(f'Generated access token: {access_token}')
-        return jsonify({'access_token': access_token})
     except ApiException as e:
         logging.error(f'API Exception: {str(e)}')
         return jsonify({'error': str(e)}), 500
@@ -82,7 +80,6 @@ def create_update_token():
     try:
         logging.info("Starting update token creation process.")
         access_token = request.json.get('access_token')
-        logging.debug(f'Received access token: {access_token}')
         
         if not access_token:
             logging.error("Access token is required but not provided.")
@@ -113,4 +110,4 @@ def index():
 
 if __name__ == '__main__':
     logging.info("Starting Flask server.")
-    app.run(port=5000, debug=True)
+    app.run(port=5000, debug=False)

@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                   'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                  access_token: 'access-production-c8e97de2-bca0-43d0-9ee9-5d18fe3904b2' // Replace with the actual access token
+                  access_token: 'your_access_token' // Replace with the actual access token
               }),
           })
           .then(response => response.json())
