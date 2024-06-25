@@ -42,23 +42,23 @@ if __name__ == "__main__":
     logging.info("Starting account update process...")
 
     # Update account information first
-    tokens = get_access_tokens_from_db()
-    for token in tokens:
-        access_token = token['access_token']
-        institution_name = token['institution_name']
-        institution_id = token['institution_id']
+    # tokens = get_access_tokens_from_db()
+    # for token in tokens:
+    #     access_token = token['access_token']
+    #     institution_name = token['institution_name']
+    #     institution_id = token['institution_id']
         
-        if access_token:
-            accounts = fetch_account_info(access_token)
-            if accounts:
-                store_accounts_in_db(accounts, access_token, institution_name, institution_id)
-        else:
-            message = f"Access token for {institution_name} is missing."
-            print(message)
-            logging.error(message)
+    #     if access_token:
+    #         accounts = fetch_account_info(access_token)
+    #         if accounts:
+    #             store_accounts_in_db(accounts, access_token, institution_name, institution_id)
+    #     else:
+    #         message = f"Access token for {institution_name} is missing."
+    #         print(message)
+    #         logging.error(message)
     
-    print("Account update process completed.")
-    logging.info("Account update process completed.")
+    # print("Account update process completed.")
+    # logging.info("Account update process completed.")
     
     print("Starting fetch and import process...")
     logging.info("Starting fetch and import process...")
