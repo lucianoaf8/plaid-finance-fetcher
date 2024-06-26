@@ -86,6 +86,7 @@ def store_accounts_in_db(accounts):
 
         for account in accounts:
             account_id = account['account_id']
+            bank_name = token['bank_name']
             available_balance = Decimal(account['balances'].get('available', 0)) if account['balances'].get('available') is not None else None
             current_balance = Decimal(account['balances'].get('current', 0)) if account['balances'].get('current') is not None else None
             balance_limit = Decimal(account['balances'].get('limit', 0)) if account['balances'].get('limit') is not None else None
@@ -99,11 +100,12 @@ def store_accounts_in_db(accounts):
 
             cursor.execute("""
                 INSERT INTO plaid_accounts (
-                    account_id, available_balance, current_balance, balance_limit,
+                    account_id, bank_name, available_balance, current_balance, balance_limit,
                     iso_currency_code, unofficial_currency_code, mask, name, 
                     official_name, type, subtype
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE 
+                    bank_name=VALUES(bank_name),
                     available_balance=VALUES(available_balance),
                     current_balance=VALUES(current_balance),
                     balance_limit=VALUES(balance_limit),
@@ -116,7 +118,7 @@ def store_accounts_in_db(accounts):
                     subtype=VALUES(subtype),
                     updated_at=VALUES(updated_at)
             """, (
-                account_id, available_balance, current_balance, balance_limit,
+                account_id, bank_name, available_balance, current_balance, balance_limit,
                 iso_currency_code, unofficial_currency_code, mask, name, 
                 official_name, type_, subtype
             ))
@@ -134,7 +136,7 @@ def get_access_tokens_from_db():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT access_token, bank_name, bank_id FROM finance.plaid_access_tokens")
+        cursor.execute("SELECT access_token, bank_name, bank_id FROM finance.plaid_access_tokens WHERE bank_id = 'ins_40'")
         tokens = cursor.fetchall()
         cursor.close()
         conn.close()

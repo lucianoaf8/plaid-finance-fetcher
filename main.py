@@ -67,6 +67,7 @@ if __name__ == "__main__":
     for token in tokens:
         access_token = token['access_token']
         bank_name = token['bank_name']
+        bank_name = token['bank_name']
 
         # Fetch transactions
         transactions_file = fetch_transactions.fetch_transactions(access_token, bank_name)

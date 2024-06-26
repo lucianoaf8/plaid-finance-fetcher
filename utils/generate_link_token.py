@@ -38,7 +38,7 @@ client = plaid_api.PlaidApi(api_client)
 
 def create_link_token():
     request = LinkTokenCreateRequest(
-        user=LinkTokenCreateRequestUser(client_user_id='tangerine'),
+        user=LinkTokenCreateRequestUser(client_user_id='cibc'),
         client_name='plaid-finance-fetcher',
         products=[Products('transactions')],
         country_codes=[CountryCode('CA')],
