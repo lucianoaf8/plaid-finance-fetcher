@@ -40,7 +40,7 @@ def create_link_token():
     request = LinkTokenCreateRequest(
         user=LinkTokenCreateRequestUser(client_user_id='tangerine'),
         client_name='plaid-finance-fetcher',
-        products=[Products('transactions'), Products('liabilities'), Products('assets')],
+        products=[Products('transactions')],
         country_codes=[CountryCode('CA')],
         language='en',
     )

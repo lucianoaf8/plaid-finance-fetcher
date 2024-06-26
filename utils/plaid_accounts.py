@@ -4,11 +4,12 @@ import logging
 from dotenv import load_dotenv
 from plaid.api import plaid_api
 from plaid import configuration, api_client
-from plaid.api_client import ApiException
 from plaid.model.accounts_get_request import AccountsGetRequest
 from datetime import datetime
 from urllib.parse import urlparse
 from mysql.connector import pooling
+from decimal import Decimal
+from plaid.api_client import ApiException
 
 # Load environment variables from .env file
 load_dotenv()
@@ -78,42 +79,46 @@ def fetch_account_info(access_token):
         logging.error(f"Error fetching account information: {error_response}")
         return None
 
-def store_accounts_in_db(accounts, access_token, institution_name, institution_id):
+def store_accounts_in_db(accounts):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
         for account in accounts:
             account_id = account['account_id']
-            name = account['name']
+            available_balance = Decimal(account['balances'].get('available', 0)) if account['balances'].get('available') is not None else None
+            current_balance = Decimal(account['balances'].get('current', 0)) if account['balances'].get('current') is not None else None
+            balance_limit = Decimal(account['balances'].get('limit', 0)) if account['balances'].get('limit') is not None else None
+            iso_currency_code = account['balances'].get('iso_currency_code', None)
+            unofficial_currency_code = account['balances'].get('unofficial_currency_code', None)
+            mask = account.get('mask', None)
+            name = account.get('name', '')
             official_name = account.get('official_name', '')
-            type_ = str(account['type'])
-            subtype = str(account['subtype'])
-            balances = json.dumps(account['balances'].to_dict())
-            mask = account['mask']
-            verification_status = account.get('verification_status', '')
+            type_ = str(account.get('type', ''))
+            subtype = str(account.get('subtype', ''))
 
             cursor.execute("""
                 INSERT INTO plaid_accounts (
-                    account_id, access_token, institution_id, institution_name, 
-                    account_name, official_name, account_type, account_subtype, 
-                    balances, mask, verification_status
+                    account_id, available_balance, current_balance, balance_limit,
+                    iso_currency_code, unofficial_currency_code, mask, name, 
+                    official_name, type, subtype
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE 
-                    access_token=VALUES(access_token),
-                    institution_id=VALUES(institution_id),
-                    institution_name=VALUES(institution_name),
-                    account_name=VALUES(account_name),
-                    official_name=VALUES(official_name),
-                    account_type=VALUES(account_type),
-                    account_subtype=VALUES(account_subtype),
-                    balances=VALUES(balances),
+                    available_balance=VALUES(available_balance),
+                    current_balance=VALUES(current_balance),
+                    balance_limit=VALUES(balance_limit),
+                    iso_currency_code=VALUES(iso_currency_code),
+                    unofficial_currency_code=VALUES(unofficial_currency_code),
                     mask=VALUES(mask),
-                    verification_status=VALUES(verification_status),
+                    name=VALUES(name),
+                    official_name=VALUES(official_name),
+                    type=VALUES(type),
+                    subtype=VALUES(subtype),
                     updated_at=VALUES(updated_at)
             """, (
-                account_id, access_token, institution_id, institution_name,
-                name, official_name, type_, subtype, balances, mask, verification_status
+                account_id, available_balance, current_balance, balance_limit,
+                iso_currency_code, unofficial_currency_code, mask, name, 
+                official_name, type_, subtype
             ))
 
         conn.commit()
@@ -129,7 +134,7 @@ def get_access_tokens_from_db():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT DISTINCT access_token, institution_name, institution_id FROM plaid_accounts")
+        cursor.execute("SELECT access_token, bank_name, bank_id FROM finance.plaid_access_tokens")
         tokens = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -140,10 +145,6 @@ def get_access_tokens_from_db():
         return []
 
 if __name__ == "__main__":
-    new_account_token = os.getenv("NEW_ACCOUNT_TOKEN")
-    new_institution_name = os.getenv("NEW_BANK_NAME")
-    new_institution_id = os.getenv("NEW_BANK_ID")
-    
     print(f"Starting accounts fetch process...")
     logging.info(f"Starting accounts fetch process...")
 
@@ -151,22 +152,23 @@ if __name__ == "__main__":
     
     for token in tokens:
         access_token = token['access_token']
-        institution_name = token['institution_name']
-        institution_id = token['institution_id']
+        bank_name = token['bank_name']
+        bank_id = token['bank_id']
         
         if access_token:
             accounts = fetch_account_info(access_token)
             if accounts:
-                store_accounts_in_db(accounts, access_token, institution_name, institution_id)
+                store_accounts_in_db(accounts)
+
+                accounts_dict = [account.to_dict() for account in accounts]
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                filename = f'data/fetched-files/plaid_accounts_{bank_name}_{timestamp}.json'
+                with open(filename, 'w') as file:
+                    json.dump(accounts_dict, file)
         else:
-            message = f"Access token for {institution_name} is missing."
+            message = f"Access token for {bank_name} is missing."
             print(message)
             logging.error(message)
-    
-    if new_account_token:
-        accounts = fetch_account_info(new_account_token)
-        if accounts:
-            store_accounts_in_db(accounts, new_account_token, new_institution_name,new_institution_id)
     
     print("Accounts fetch process completed.")
     logging.info("Accounts fetch process completed.")

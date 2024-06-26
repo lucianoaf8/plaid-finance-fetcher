@@ -18,7 +18,7 @@ PLAID_ENV_URLS = {
     "development": "https://development.plaid.com",
     "production": "https://production.plaid.com"
 }
-PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://development.plaid.com")  # Default to development
+PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://production.plaid.com")  # Default to development
 
 # Configure Plaid client
 configuration = configuration.Configuration(
