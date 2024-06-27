@@ -11,18 +11,6 @@ CREATE TABLE asset_report (
     days_requested INT -- Number of days the report covers
 );
 
--- Table to store user information associated with the report
--- Example: client_user_id=NULL, email=NULL, first_name=NULL, last_name=NULL, middle_name=NULL, phone_number=NULL, ssn=NULL
-CREATE TABLE user (
-    client_user_id VARCHAR(50), -- Client-provided user identifier
-    email VARCHAR(100), -- User's email address
-    first_name VARCHAR(50), -- User's first name
-    last_name VARCHAR(50), -- User's last name
-    middle_name VARCHAR(50), -- User's middle name
-    phone_number VARCHAR(20), -- User's phone number
-    ssn VARCHAR(20) -- User's Social Security Number
-);
-
 -- Table to store items associated with the report
 -- Example: item_id='AL6LmqjboJCLwoMqxyajT93O31b1eLc6mMLQr', asset_report_id='a04fa14e-03dc-4311-b3b3-0205d10dcf7d', institution_name='Tangerine - Personal', institution_id='ins_40', date_last_updated='2024-06-27 02:03:08'
 CREATE TABLE item (
@@ -31,7 +19,7 @@ CREATE TABLE item (
     institution_name VARCHAR(100), -- Name of the financial institution
     institution_id VARCHAR(50), -- Identifier for the financial institution
     date_last_updated DATETIME, -- Date and time when the item was last updated
-    FOREIGN KEY (asset_report_id) REFERENCES asset_report(asset_report_id)
+    FOREIGN KEY (asset_report_id) REFERENCES asset_report(asset_report_id) ON DELETE CASCADE
 );
 
 -- Table to store account details
@@ -51,8 +39,9 @@ CREATE TABLE account (
     type VARCHAR(50), -- Type of account (e.g., 'depository')
     subtype VARCHAR(50), -- Subtype of account (e.g., 'savings')
     days_available INT, -- Number of days the account data is available
-    ownership_type VARCHAR(50), -- Type of ownership, if specified
-    FOREIGN KEY (item_id) REFERENCES item(item_id)
+    asset_report_id VARCHAR(50), -- Identifier for the associated asset report
+    FOREIGN KEY (item_id) REFERENCES item(item_id),
+    FOREIGN KEY (asset_report_id) REFERENCES asset_report(asset_report_id) ON DELETE CASCADE
 );
 
 -- Table to store transaction details for each account
@@ -66,52 +55,9 @@ CREATE TABLE transaction (
     original_description VARCHAR(255), -- Original description of the transaction
     date DATE, -- Date of the transaction
     pending BOOLEAN, -- Whether the transaction is pending
-    FOREIGN KEY (account_id) REFERENCES account(account_id)
-);
-
--- Table to store owner details for each account
--- Example: owner_id=1, account_id='4OYOERLAkwIQdknYq7rMCXrRx5B0PpUJ9pj4m', name='Luciano Almeida'
-CREATE TABLE owner (
-    owner_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for the owner
-    account_id VARCHAR(50), -- Identifier for the associated account
-    name VARCHAR(100), -- Name of the owner
-    FOREIGN KEY (account_id) REFERENCES account(account_id)
-);
-
--- Table to store phone numbers for each owner
--- Example: phone_id=1, owner_id=1, data='+14033698487', primary_phone=TRUE, type='mobile'
-CREATE TABLE owner_phone (
-    phone_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for the phone number
-    owner_id INT, -- Identifier for the associated owner
-    data VARCHAR(20), -- Phone number
-    primary_phone BOOLEAN, -- Whether this is the primary phone number
-    type VARCHAR(10), -- Type of phone number (e.g., 'mobile', 'home')
-    FOREIGN KEY (owner_id) REFERENCES owner(owner_id)
-);
-
--- Table to store email addresses for each owner
--- Example: email_id=1, owner_id=1, data='lucianoaf8@gmail.com', primary_email=TRUE, type='primary'
-CREATE TABLE owner_email (
-    email_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for the email address
-    owner_id INT, -- Identifier for the associated owner
-    data VARCHAR(100), -- Email address
-    primary_email BOOLEAN, -- Whether this is the primary email address
-    type VARCHAR(10), -- Type of email address (e.g., 'primary')
-    FOREIGN KEY (owner_id) REFERENCES owner(owner_id)
-);
-
--- Table to store addresses for each owner
--- Example: address_id=1, owner_id=1, city='Calgary', region='AB', street='Unit 601, 140 10 Ave SW', postal_code='T2R 0A3', country='CA', primary_address=TRUE
-CREATE TABLE owner_address (
-    address_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for the address
-    owner_id INT, -- Identifier for the associated owner
-    city VARCHAR(50), -- City of the address
-    region VARCHAR(20), -- Region/State of the address
-    street VARCHAR(100), -- Street address
-    postal_code VARCHAR(10), -- Postal code
-    country VARCHAR(10), -- Country
-    primary_address BOOLEAN, -- Whether this is the primary address
-    FOREIGN KEY (owner_id) REFERENCES owner(owner_id)
+    asset_report_id VARCHAR(50),  -- Identifier for the associated asset report
+    FOREIGN KEY (account_id) REFERENCES account(account_id),
+    FOREIGN KEY (asset_report_id) REFERENCES asset_report(asset_report_id) ON DELETE CASCADE
 );
 
 -- Table to store historical balance details for each account
@@ -123,5 +69,7 @@ CREATE TABLE historical_balance (
     current DECIMAL(10,2), -- Current balance
     iso_currency_code VARCHAR(10), -- ISO currency code (e.g., 'CAD')
     unofficial_currency_code VARCHAR(10), -- Unofficial currency code, if any
-    FOREIGN KEY (account_id) REFERENCES account(account_id)
+    asset_report_id VARCHAR(50),  -- Identifier for the associated asset report
+    FOREIGN KEY (account_id) REFERENCES account(account_id),
+    FOREIGN KEY (asset_report_id) REFERENCES asset_report(asset_report_id) ON DELETE CASCADE
 );

@@ -65,7 +65,7 @@ def convert_datetimes(obj):
         obj = obj.isoformat()
     return obj
 
-def create_asset_report(access_tokens, days_requested=60):
+def create_asset_report(access_tokens, days_requested=731):
     try:
         options = AssetReportCreateRequestOptions()
         request = AssetReportCreateRequest(
