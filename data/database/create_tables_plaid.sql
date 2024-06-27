@@ -1,6 +1,6 @@
 -- Create the database
-CREATE DATABASE IF NOT EXISTS finance;
-USE finance;
+CREATE DATABASE IF NOT EXISTS plaid;
+USE plaid;
 
 /*
 plaid_access_tokens
@@ -447,4 +447,30 @@ CREATE TABLE plaid_transaction_counterparties_history (
     phone_number VARCHAR(50), -- Phone number of the counterparty
     file_import_id INT, -- Identifier for the associated file import
     FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE -- Foreign key constraint
+);
+
+/*
+categories
+    Table Description: Table to store category information with hierarchical relationships.
+Examples:
+    category_id='10000000'
+    category_group='special'
+    hierarchy_level1='Bank Fees'
+    
+    category_id='10001000'
+    category_group='special'
+    hierarchy_level1='Bank Fees'
+    hierarchy_level2='Overdraft'
+    
+    category_id='10002000'
+    category_group='special'
+    hierarchy_level1='Bank Fees'
+    hierarchy_level2='ATM'
+*/
+CREATE TABLE categories (
+    category_id VARCHAR(8) NOT NULL PRIMARY KEY, -- Unique identifier for the category
+    category_group VARCHAR(50) NOT NULL, -- Group name the category belongs to
+    hierarchy_level1 VARCHAR(255), -- Level 1 hierarchy name
+    hierarchy_level2 VARCHAR(255), -- Level 2 hierarchy name
+    hierarchy_level3 VARCHAR(255) -- Level 3 hierarchy name
 );
