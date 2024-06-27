@@ -97,10 +97,10 @@ def fetch_transactions(access_token, bank_name, start_date=None, end_date=None):
             print(f"Fetched {len(transactions)} transactions in this batch. Total so far: {total_transactions}")
             
             # Check if we need to paginate
-            if len(transactions) < response['total_transactions']:
-                options.offset += len(transactions)
-            else:
+            if len(transactions) == 0 or total_transactions >= response['total_transactions']:
                 break
+
+            options.offset += len(transactions)
 
         except ApiException as e:
             error_response = json.loads(e.body)
