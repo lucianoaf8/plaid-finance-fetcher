@@ -88,6 +88,7 @@ def create_update_token():
         update_request_data = LinkTokenCreateRequest(
             user=LinkTokenCreateRequestUser(client_user_id='unique_static_user_id'),
             client_name='finance-fetcher',
+            products=[Products('transactions'), Products('assets')],
             country_codes=[CountryCode('CA')],
             language='en',
             access_token=access_token

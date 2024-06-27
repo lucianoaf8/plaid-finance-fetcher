@@ -15,7 +15,7 @@
     document.getElementById('linkButton').onclick = function () {
       console.log('Link Bank Account button clicked.');
       var linkHandler = Plaid.create({
-        token: 'link-production-60d76914-c693-4e59-bb09-c0c464bc2f47', // Replace with the new link token you generated
+        token: 'you_link_here', // Replace with the new link token you generated
         onSuccess: function(public_token, metadata) {
           console.log('Link success. Public Token:', public_token);
           console.log('Metadata:', metadata);
@@ -61,7 +61,6 @@
         console.warn('No valid access token available.');
         accessToken = prompt('No valid access token available. Please enter your access token:');
       }
-
       if (accessToken && !accessToken.startsWith('Error')) {
         console.log('Using Access Token:', accessToken);
         fetch('http://127.0.0.1:5000/create_update_token', {
