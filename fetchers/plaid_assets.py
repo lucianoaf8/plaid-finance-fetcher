@@ -3,7 +3,7 @@ import sys
 import json
 import logging
 import time
-from datetime import datetime, timedelta, date
+from datetime import datetime, date
 from dotenv import load_dotenv
 from plaid.api import plaid_api
 from plaid import configuration, api_client
@@ -89,8 +89,8 @@ def fetch_asset_report(asset_report_token):
         request = AssetReportGetRequest(asset_report_token=asset_report_token)
         response = client.asset_report_get(request)
         report = response.to_dict()  # Convert to dict for JSON serialization
-        logging.info(f"Asset report fetched: {report}")
-        print(f"Asset report fetched: {report}")
+        logging.info(f"Asset report fetched")
+        print(f"Asset report fetched")
         return report
     except ApiException as e:
         error_response = json.loads(e.body)

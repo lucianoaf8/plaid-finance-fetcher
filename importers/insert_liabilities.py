@@ -1,7 +1,6 @@
 import os
 import json
 import logging
-import mysql.connector
 from mysql.connector import pooling
 from urllib.parse import urlparse
 from datetime import datetime
