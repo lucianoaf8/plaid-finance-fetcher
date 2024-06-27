@@ -64,15 +64,20 @@ def exchange_public_token_endpoint():
             return jsonify({'error': 'public_token is required'}), 400
 
         exchange_request = ItemPublicTokenExchangeRequest(
+            client_id=PLAID_CLIENT_ID,
+            secret=PLAID_SECRET,
             public_token=public_token
         )
         response = client.item_public_token_exchange(exchange_request)
         access_token = response['access_token']
+        logging.debug(f'Exchange successful. Access token: {access_token}')
+        return jsonify({'access_token': access_token})
     except ApiException as e:
-        logging.error(f'API Exception: {str(e)}')
+        logging.error(f'API Exception: {str(e)} - {e.body}')
         return jsonify({'error': str(e)}), 500
     except Exception as e:
         logging.error(f'Unexpected Exception: {str(e)}')
+        logging.debug('Exception details:', exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/create_update_token', methods=['POST'])
