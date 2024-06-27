@@ -453,19 +453,10 @@ CREATE TABLE plaid_transaction_counterparties_history (
 categories
     Table Description: Table to store category information with hierarchical relationships.
 Examples:
-    category_id='10000000'
-    category_group='special'
-    hierarchy_level1='Bank Fees'
-    
     category_id='10001000'
     category_group='special'
     hierarchy_level1='Bank Fees'
     hierarchy_level2='Overdraft'
-    
-    category_id='10002000'
-    category_group='special'
-    hierarchy_level1='Bank Fees'
-    hierarchy_level2='ATM'
 */
 CREATE TABLE categories (
     category_id VARCHAR(8) NOT NULL PRIMARY KEY, -- Unique identifier for the category
@@ -473,4 +464,98 @@ CREATE TABLE categories (
     hierarchy_level1 VARCHAR(255), -- Level 1 hierarchy name
     hierarchy_level2 VARCHAR(255), -- Level 2 hierarchy name
     hierarchy_level3 VARCHAR(255) -- Level 3 hierarchy name
+);
+
+-- Table for inflow_streams
+/*
+inflow_streams
+    Table Description: Stores information about incoming financial transactions including categories, amounts, and frequencies.
+Examples:
+    stream_id='KAkA9rbn1xTqbkBrp1wxS4EYx3KMBmCQn41ze'
+    account_id='rDND7jznYEH6eXvNMo35t81a63z4e7faRMODd'
+    description='EFT Deposit from COMPLYWORKS LTD'
+    first_date='2022-07-07'
+    last_date='2024-06-20'
+*/
+CREATE TABLE inflow_streams (
+    stream_id VARCHAR(255) PRIMARY KEY, -- Unique identifier for the inflow stream
+    account_id VARCHAR(255), -- Account associated with the stream
+    category_id VARCHAR(255), -- Category identifier
+    description TEXT, -- Description of the transaction
+    merchant_name VARCHAR(255), -- Name of the merchant
+    first_date DATE, -- First date of the transaction
+    last_date DATE, -- Last date of the transaction
+    frequency VARCHAR(50), -- Frequency of the transaction
+    average_amount DECIMAL(10, 2), -- Average amount of the transaction
+    last_amount DECIMAL(10, 2), -- Last amount of the transaction
+    is_active BOOLEAN, -- Whether the stream is active
+    status VARCHAR(50), -- Status of the stream
+    is_user_modified BOOLEAN, -- Whether the stream was modified by the user
+    last_user_modified_datetime DATETIME, -- Last user modification datetime
+    pers_fin_primary_category VARCHAR(255), -- Personal finance primary category
+    pers_fin_detailed_category VARCHAR(255), -- Personal finance detailed category
+    pers_fin_confidence_level VARCHAR(50), -- Personal finance confidence level
+    file_import_id INT, -- ID of the file import record
+    FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE -- Foreign key to file_import_tracker
+);
+
+-- Table for outflow_streams
+/*
+outflow_streams
+    Table Description: Stores information about outgoing financial transactions including categories, amounts, and frequencies.
+Examples:
+    stream_id='M0v0Aa7XqxFjZmXayVL0f13Dk8OKeOSMD65y1'
+    account_id='rDND7jznYEH6eXvNMo35t81a63z4e7faRMODd'
+    description='Bill Payment - TRIANGLE MASTERCARD - ************4169'
+    first_date='2022-07-22'
+    last_date='2024-06-13'
+*/
+CREATE TABLE outflow_streams (
+    stream_id VARCHAR(255) PRIMARY KEY, -- Unique identifier for the outflow stream
+    account_id VARCHAR(255), -- Account associated with the stream
+    category_id VARCHAR(255), -- Category identifier
+    description TEXT, -- Description of the transaction
+    merchant_name VARCHAR(255), -- Name of the merchant
+    first_date DATE, -- First date of the transaction
+    last_date DATE, -- Last date of the transaction
+    frequency VARCHAR(50), -- Frequency of the transaction
+    average_amount DECIMAL(10, 2), -- Average amount of the transaction
+    last_amount DECIMAL(10, 2), -- Last amount of the transaction
+    is_active BOOLEAN, -- Whether the stream is active
+    status VARCHAR(50), -- Status of the stream
+    is_user_modified BOOLEAN, -- Whether the stream was modified by the user
+    last_user_modified_datetime DATETIME, -- Last user modification datetime
+    pers_fin_primary_category VARCHAR(255), -- Personal finance primary category
+    pers_fin_detailed_category VARCHAR(255), -- Personal finance detailed category
+    pers_fin_confidence_level VARCHAR(50), -- Personal finance confidence level
+    file_import_id INT, -- ID of the file import record
+    FOREIGN KEY (file_import_id) REFERENCES file_import_tracker(id) ON DELETE CASCADE -- Foreign key to file_import_tracker
+);
+
+-- Table for transaction_ids related to inflow_streams
+/*
+inflow_transactions
+    Table Description: Stores transaction IDs related to inflow streams.
+Examples:
+    transaction_id='M0v0Aa7XqxFjZmXayVL0fwXav1zm5YIpYokj9'
+    stream_id='KAkA9rbn1xTqbkBrp1wxS4EYx3KMBmCQn41ze'
+*/
+CREATE TABLE inflow_transactions (
+    transaction_id VARCHAR(255) PRIMARY KEY, -- Unique identifier for the transaction
+    stream_id VARCHAR(255), -- Associated inflow stream
+    FOREIGN KEY (stream_id) REFERENCES inflow_streams(stream_id) ON DELETE CASCADE -- Foreign key to inflow_streams
+);
+
+-- Table for transaction_ids related to outflow_streams
+/*
+outflow_transactions
+    Table Description: Stores transaction IDs related to outflow streams.
+Examples:
+    transaction_id='8oYo1XqrjQfkJjPqXNRnh1wApbXEo3UvnDKXm'
+    stream_id='M0v0Aa7XqxFjZmXayVL0f13Dk8OKeOSMD65y1'
+*/
+CREATE TABLE outflow_transactions (
+    transaction_id VARCHAR(255) PRIMARY KEY, -- Unique identifier for the transaction
+    stream_id VARCHAR(255), -- Associated outflow stream
+    FOREIGN KEY (stream_id) REFERENCES outflow_streams(stream_id) ON DELETE CASCADE -- Foreign key to outflow_streams
 );

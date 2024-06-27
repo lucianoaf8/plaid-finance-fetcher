@@ -1,5 +1,10 @@
 USE plaid;
 
+DROP TABLE IF EXISTS inflow_transactions;
+DROP TABLE IF EXISTS outflow_transactions;
+DROP TABLE IF EXISTS inflow_streams;
+DROP TABLE IF EXISTS outflow_streams;
+
 DROP TABLE IF EXISTS plaid_liabilities_credit_apr;
 DROP TABLE IF EXISTS plaid_liabilities_credit;
 DROP TABLE IF EXISTS plaid_transaction_counterparties;
