@@ -70,7 +70,7 @@ def fetch_transactions(access_token, bank_name, start_date=None, end_date=None):
     total_transactions = 0
 
     if start_date is None:
-        start_date = datetime.now() - timedelta(days=365*2)  # 2 years ago by default
+        start_date = datetime.now() - timedelta(days=365*5)  # 5 years ago by default
     if end_date is None:
         end_date = datetime.now()
 

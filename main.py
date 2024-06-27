@@ -45,15 +45,15 @@ if __name__ == "__main__":
     tokens = get_access_tokens_from_db()
     for token in tokens:
         access_token = token['access_token']
-        institution_name = token['bank_name']
-        institution_id = token['bank_id']
+        bank_name = token['bank_name']
+        bank_id = token['bank_id']
         
         if access_token:
             accounts = fetch_account_info(access_token)
             if accounts:
-                store_accounts_in_db(accounts)
+                store_accounts_in_db(accounts, bank_name)
         else:
-            message = f"Access token for {institution_name} is missing."
+            message = f"Access token for {bank_name} is missing."
             print(message)
             logging.error(message)
     

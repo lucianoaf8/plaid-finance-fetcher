@@ -79,14 +79,13 @@ def fetch_account_info(access_token):
         logging.error(f"Error fetching account information: {error_response}")
         return None
 
-def store_accounts_in_db(accounts):
+def store_accounts_in_db(accounts, bank_name):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
         for account in accounts:
             account_id = account['account_id']
-            bank_name = token['bank_name']
             available_balance = Decimal(account['balances'].get('available', 0)) if account['balances'].get('available') is not None else None
             current_balance = Decimal(account['balances'].get('current', 0)) if account['balances'].get('current') is not None else None
             balance_limit = Decimal(account['balances'].get('limit', 0)) if account['balances'].get('limit') is not None else None
@@ -136,7 +135,7 @@ def get_access_tokens_from_db():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT access_token, bank_name, bank_id FROM finance.plaid_access_tokens WHERE bank_id = 'ins_40'")
+        cursor.execute("SELECT access_token, bank_name, bank_id FROM finance.plaid_access_tokens WHERE bank_name LIKE '%Tangerine%'")
         tokens = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -160,7 +159,7 @@ if __name__ == "__main__":
         if access_token:
             accounts = fetch_account_info(access_token)
             if accounts:
-                store_accounts_in_db(accounts)
+                store_accounts_in_db(accounts, bank_name)
 
                 accounts_dict = [account.to_dict() for account in accounts]
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
