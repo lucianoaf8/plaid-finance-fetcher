@@ -1,13 +1,21 @@
 import os
+import sys
 import json
 import logging
+import time
 from datetime import datetime, timedelta, date
 from dotenv import load_dotenv
 from plaid.api import plaid_api
 from plaid import configuration, api_client
 from plaid.api_client import ApiException
-from plaid.model.transactions_sync_request import TransactionsSyncRequest
-import time
+from plaid.model.transactions_get_request import TransactionsGetRequest
+from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from utils.plaid_accounts import get_access_tokens_from_db
 
 # Load environment variables from .env file
 load_dotenv()
@@ -57,24 +65,43 @@ def convert_dates_to_strings(obj):
         obj = obj.isoformat()
     return obj
 
-def fetch_transactions(access_token, bank_name, cursor=""):
+def fetch_transactions(access_token, bank_name, start_date=None, end_date=None):
     all_transactions = []
-    has_more = True
+    total_transactions = 0
 
-    while has_more:
+    if start_date is None:
+        start_date = datetime.now() - timedelta(days=365*2)  # 2 years ago by default
+    if end_date is None:
+        end_date = datetime.now()
+
+    start_date = start_date.date()
+    end_date = end_date.date()
+
+    options = TransactionsGetRequestOptions()
+    options.count = 500  # Adjust the count as needed
+    options.offset = 0
+
+    while True:
         try:
-            request = TransactionsSyncRequest(
+            request = TransactionsGetRequest(
                 access_token=access_token,
-                cursor=cursor,
-                count=500
+                start_date=start_date,
+                end_date=end_date,
+                options=options
             )
-            response = client.transactions_sync(request)
-            if 'added' in response:
-                transactions = response['added']
-                all_transactions.extend(transactions)
-            if 'next_cursor' in response:
-                cursor = response['next_cursor']
-            has_more = response.get('has_more', False)
+            response = client.transactions_get(request)
+            transactions = response['transactions']
+            all_transactions.extend(transactions)
+            total_transactions += len(transactions)
+            
+            print(f"Fetched {len(transactions)} transactions in this batch. Total so far: {total_transactions}")
+            
+            # Check if we need to paginate
+            if len(transactions) < response['total_transactions']:
+                options.offset += len(transactions)
+            else:
+                break
+
         except ApiException as e:
             error_response = json.loads(e.body)
             error_code = error_response.get('error_code')
@@ -95,21 +122,28 @@ def fetch_transactions(access_token, bank_name, cursor=""):
     with open(filename, 'w') as file:
         json.dump(transactions_dicts, file, indent=4)
 
-    message = f"Transactions for {bank_name} fetched and saved successfully as {filename}."
+    message = f"Transactions for {bank_name} fetched and saved successfully as {filename}. Total transactions: {total_transactions}"
     print(message)
     logging.info(message)
     return filename
 
 if __name__ == "__main__":
-    access_token = os.getenv("NEW_ACCOUNT_TOKEN")
-    bank_name = os.getenv("NEW_BANK_NAME")
-    print(f"Starting transactions fetch process for {bank_name}...")
-    logging.info(f"Starting transactions fetch process for {bank_name}...")
-    if access_token:
-        fetch_transactions(access_token, bank_name)
-    else:
-        message = "Access token is required."
-        print(message)
-        logging.error(message)
+    
+    tokens = get_access_tokens_from_db()
+    
+    for token in tokens:
+        access_token = token['access_token']
+        bank_name = token['bank_name']
+        bank_id = token['bank_id']
+        
+        print(f"Starting transactions fetch process for {bank_name}...")
+        logging.info(f"Starting transactions fetch process for {bank_name}...")
+
+        if access_token:
+            fetch_transactions(access_token, bank_name)
+        else:
+            message = "Access token is required."
+            print(message)
+            logging.error(message)
     print("Transactions fetch process completed.")
     logging.info("Transactions fetch process completed.")
