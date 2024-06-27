@@ -12,7 +12,6 @@ load_dotenv()
 MYSQL_URL = os.getenv("MYSQL_URL")
 MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-PLAID_ASSETS_DB = os.getenv("PLAID_ASSETS_DB")
 
 # Set up logging
 log_dir = 'logs'
@@ -31,7 +30,7 @@ dbconfig = {
     "port": urlparse(MYSQL_URL).port if urlparse(MYSQL_URL).port else 3306,
     "user": MYSQL_USER,
     "password": MYSQL_PASSWORD,
-    "database": PLAID_ASSETS_DB
+    "database": urlparse(MYSQL_URL).path.lstrip('/')
 }
 
 connection_pool = pooling.MySQLConnectionPool(pool_name="mypool", pool_size=5, **dbconfig)
@@ -86,7 +85,7 @@ def insert_item(item, asset_report_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     sql = """
-    INSERT INTO item (item_id, asset_report_id, institution_name, institution_id, date_last_updated)
+    INSERT INTO asset_item (item_id, asset_report_id, institution_name, institution_id, date_last_updated)
     VALUES (%s, %s, %s, %s, %s)
     """
     values = (
@@ -114,7 +113,7 @@ def insert_account(account, item_id, asset_report_id):
     cursor = conn.cursor()
     balances = account['balances']
     sql = """
-    INSERT INTO account (account_id, item_id, available, current, `limit`, margin_loan_amount, iso_currency_code,
+    INSERT INTO asset_account (account_id, item_id, available, current, `limit`, margin_loan_amount, iso_currency_code,
                          unofficial_currency_code, mask, name, official_name, type, subtype, days_available, asset_report_id)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
@@ -152,7 +151,7 @@ def insert_transaction(transaction, asset_report_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     sql = """
-    INSERT INTO transaction (transaction_id, account_id, amount, iso_currency_code, unofficial_currency_code,
+    INSERT INTO asset_transaction (transaction_id, account_id, amount, iso_currency_code, unofficial_currency_code,
                              original_description, date, pending, asset_report_id)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
@@ -183,7 +182,7 @@ def insert_historical_balance(balance, account_id, asset_report_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     sql = """
-    INSERT INTO historical_balance (account_id, date, current, iso_currency_code, unofficial_currency_code, asset_report_id)
+    INSERT INTO asset_historical_balance (account_id, date, current, iso_currency_code, unofficial_currency_code, asset_report_id)
     VALUES (%s, %s, %s, %s, %s, %s)
     """
     values = (
