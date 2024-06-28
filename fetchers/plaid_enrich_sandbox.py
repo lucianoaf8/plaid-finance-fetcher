@@ -1,16 +1,15 @@
 import os
 import json
 import logging
+import pandas as pd
 from dotenv import load_dotenv
-from decimal import Decimal
 from plaid.api import plaid_api
 from plaid import configuration, api_client
 from plaid.model.transactions_enrich_request import TransactionsEnrichRequest
 from plaid.model.client_provided_transaction import ClientProvidedTransaction
 from plaid.model.enrich_transaction_direction import EnrichTransactionDirection
+from plaid.model.client_provided_transaction_location import ClientProvidedTransactionLocation
 from datetime import datetime
-from urllib.parse import urlparse
-from mysql.connector import pooling
 from plaid.api_client import ApiException
 
 # Load environment variables from .env file
@@ -28,36 +27,11 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s:%(message)s'
 )
 
-# Database connection pool
-MYSQL_URL = os.getenv("MYSQL_URL")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-
-url = urlparse(MYSQL_URL)
-connection_pool = pooling.MySQLConnectionPool(
-    pool_name="mypool",
-    pool_size=5,
-    host=url.hostname,
-    port=url.port if url.port else 3306,
-    user=MYSQL_USER,
-    password=MYSQL_PASSWORD,
-    database='finance'  # Hardcoded the database name
-)
-
-def get_db_connection():
-    return connection_pool.get_connection()
-
 # Plaid configuration
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
-PLAID_ENV = os.getenv("PLAID_ENV", "development")
 
-PLAID_ENV_URLS = {
-    "sandbox": "https://sandbox.plaid.com",
-    "development": "https://development.plaid.com",
-    "production": "https://production.plaid.com"
-}
-PLAID_HOST = PLAID_ENV_URLS.get(PLAID_ENV, "https://production.plaid.com")
+PLAID_HOST = "https://sandbox.plaid.com"
 
 configuration = configuration.Configuration(
     host=PLAID_HOST,
@@ -69,30 +43,35 @@ configuration = configuration.Configuration(
 api_client = api_client.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
-def get_data_to_enrich():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM finance.mbna_transactions")
-        transactions = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return transactions
-    except Exception as e:
-        print(f"Error getting data from database: {e}")
-        logging.error(f"Error getting data from database: {e}")
-        return []
+def get_transactions_from_csv(file_path):
+    df = pd.read_csv(file_path)
+    transactions = df.to_dict(orient='records')
+    return transactions
 
 def enrich_transactions(transactions):
     enriched_data = []
     for transaction in transactions:
-        transaction_data = ClientProvidedTransaction(
-            id=str(transaction["transaction_id"]),
-            description=transaction["payeee"],
-            amount=abs(float(transaction["amount"])),  # Ensure amount is non-negative
-            iso_currency_code="CAD",  # Using CAD
-            direction=EnrichTransactionDirection("OUTFLOW" if transaction["amount"] < 0 else "INFLOW")  # Use enum
-        )
+        if pd.notna(transaction["city"]) and pd.notna(transaction["region"]):
+            location = ClientProvidedTransactionLocation(
+                city=transaction["city"],
+                region=transaction["region"]
+            )
+            transaction_data = ClientProvidedTransaction(
+                id=str(transaction["id"]),
+                description=transaction["description"],
+                amount=abs(float(transaction["amount"])),  # Ensure amount is non-negative
+                iso_currency_code=transaction["iso_currency_code"],
+                direction=EnrichTransactionDirection(transaction["direction"]),  # Use enum
+                location=location
+            )
+        else:
+            transaction_data = ClientProvidedTransaction(
+                id=str(transaction["id"]),
+                description=transaction["description"],
+                amount=abs(float(transaction["amount"])),  # Ensure amount is non-negative
+                iso_currency_code=transaction["iso_currency_code"],
+                direction=EnrichTransactionDirection(transaction["direction"])  # Use enum
+            )
         enriched_data.append(transaction_data)
     
     batch_size = 100
@@ -107,7 +86,7 @@ def enrich_transactions(transactions):
         
         try:
             response = client.transactions_enrich(request)
-            results.extend(response.to_dict()['transactions'])
+            results.append(response.to_dict())
         except ApiException as e:
             print(f"Exception when calling PlaidApi->transactions_enrich: {e}")
             logging.error(f"Exception when calling PlaidApi->transactions_enrich: {e}")
@@ -124,7 +103,8 @@ def save_enriched_data(data):
     logging.info(f"Enriched data saved to {filename}")
 
 def main():
-    transactions = get_data_to_enrich()
+    file_path = r'C:\Users\Luciano\Downloads\enrich_sandbox_preset_transactions.csv'
+    transactions = get_transactions_from_csv(file_path)
     if transactions:
         enriched_data = enrich_transactions(transactions)
         if enriched_data:
