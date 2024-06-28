@@ -489,7 +489,7 @@ CREATE TABLE asset_report (
 );
 
 /*
-item
+asset_item
     Table Description: Table to store items associated with the report.
 Examples:
     item_id='AL6LmqjboJCLwoMqxyajT93O31b1eLc6mMLQr'
@@ -508,7 +508,7 @@ CREATE TABLE asset_item (
 );
 
 /*
-account
+asset_account
     Table Description: Table to store account details.
 Examples:
     account_id='4OYOERLAkwIQdknYq7rMCXrRx5B0PpUJ9pj4m'
@@ -547,7 +547,7 @@ CREATE TABLE asset_account (
 );
 
 /*
-transaction
+asset_transaction
     Table Description: Table to store transaction details for each account.
 Examples:
     transaction_id='bkykKdNx7bCLXmZBO81qTAxxY3NEDLuDwaaqX'
@@ -574,7 +574,7 @@ CREATE TABLE asset_transaction (
 );
 
 /*
-historical_balance
+asset_historical_balance
     Table Description: Table to store historical balance details for each account.
 Examples:
     balance_id=1
