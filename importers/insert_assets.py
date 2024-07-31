@@ -53,8 +53,8 @@ def insert_asset_report(report, file_path):
     conn = get_db_connection()
     cursor = conn.cursor()
     sql = """
-    INSERT INTO asset_report (asset_report_id, client_report_id, date_generated, days_requested, file_path, json_file)
-    VALUES (%s, %s, %s, %s, %s, %s)
+    INSERT INTO asset_report (asset_report_id, client_report_id, date_generated, days_requested, file_path)
+    VALUES (%s, %s, %s, %s, %s)
     """
     # Read the entire JSON file content
     with open(file_path, 'r') as file:
@@ -66,7 +66,6 @@ def insert_asset_report(report, file_path):
         datetime.fromisoformat(report['date_generated'].replace('Z', '')),
         int(report['days_requested']),
         os.path.abspath(file_path),  # Use absolute path to store the full file path
-        json.dumps(json_content)  # Convert the entire JSON content to a string
     )
     try:
         cursor.execute(sql, values)

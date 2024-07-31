@@ -90,12 +90,13 @@ def fetch_transactions(access_token, bank_name, start_date=None, end_date=None):
                 options=options
             )
             response = client.transactions_get(request)
+            print(response)
             transactions = response['transactions']
             all_transactions.extend(transactions)
             total_transactions += len(transactions)
             
             print(f"Fetched {len(transactions)} transactions in this batch. Total so far: {total_transactions}")
-            
+
             # Check if we need to paginate
             if len(transactions) == 0 or total_transactions >= response['total_transactions']:
                 break

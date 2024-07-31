@@ -135,7 +135,7 @@ def get_access_tokens_from_db():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT access_token, bank_name, bank_id FROM plaid_access_tokens WHERE bank_name LIKE '%Tangerine%'")
+        cursor.execute("SELECT access_token, bank_name, bank_id FROM plaid_access_tokens WHERE bank_name LIKE '%CIBC%'")
         tokens = cursor.fetchall()
         cursor.close()
         conn.close()

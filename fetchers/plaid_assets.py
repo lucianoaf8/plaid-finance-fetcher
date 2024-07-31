@@ -106,8 +106,6 @@ def fetch_asset_report(asset_report_token):
 
 if __name__ == "__main__":
     if ASSET_REPORT_TOKEN:
-        print(f"Using existing asset report token: {ASSET_REPORT_TOKEN}")
-        logging.info(f"Using existing asset report token: {ASSET_REPORT_TOKEN}")
         report = fetch_asset_report(ASSET_REPORT_TOKEN)
     else:
         tokens = get_access_tokens_from_db()
