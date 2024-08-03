@@ -14,22 +14,24 @@ import logging
 app = Flask(__name__)
 load_dotenv()
 
-# Setup logging
-log_dir = 'logs'
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+def setup_logging():
+    log_dir = 'logs'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
-logging.basicConfig(
-    filename=os.path.join(log_dir, 'server.log'),
-    level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s:%(message)s'
-)
+    logging.basicConfig(
+        filename=os.path.join(log_dir, 'server.log'),
+        level=logging.DEBUG,
+        format='%(asctime)s %(levelname)s:%(message)s'
+    )
 
-console = logging.StreamHandler()
-console.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s %(levelname)s:%(message)s')
-console.setFormatter(formatter)
-logging.getLogger('').addHandler(console)
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s:%(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+setup_logging()
 
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = os.getenv("PLAID_SECRET")
@@ -55,12 +57,12 @@ client = plaid_api.PlaidApi(api_client)
 @app.route('/exchange_public_token', methods=['POST'])
 def exchange_public_token_endpoint():
     try:
-        logging.info("Starting public token exchange process.")
+        logging.info("exchange_public_token: Starting public token exchange process.")
         public_token = request.json.get('public_token')
-        logging.debug(f'Received public token: {public_token}')
-        
+        logging.debug(f'exchange_public_token: Received public token: {public_token}')
+
         if not public_token:
-            logging.error("Public token is required but not provided.")
+            logging.error("exchange_public_token: Public token is required but not provided.")
             return jsonify({'error': 'public_token is required'}), 400
 
         exchange_request = ItemPublicTokenExchangeRequest(
@@ -70,48 +72,48 @@ def exchange_public_token_endpoint():
         )
         response = client.item_public_token_exchange(exchange_request)
         access_token = response['access_token']
-        logging.debug(f'Exchange successful. Access token: {access_token}')
+        logging.debug(f'exchange_public_token: Exchange successful. Access token: {access_token}')
         return jsonify({'access_token': access_token})
     except ApiException as e:
-        logging.error(f'API Exception: {str(e)} - {e.body}')
+        logging.error(f'exchange_public_token: API Exception: {str(e)} - {e.body}')
         return jsonify({'error': str(e)}), 500
     except Exception as e:
-        logging.error(f'Unexpected Exception: {str(e)}')
-        logging.debug('Exception details:', exc_info=True)
+        logging.error(f'exchange_public_token: Unexpected Exception: {str(e)}')
+        logging.debug('exchange_public_token: Exception details:', exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/create_update_token', methods=['POST'])
 def create_update_token():
     try:
-        logging.info("Starting update token creation process.")
+        logging.info("create_update_token: Starting update token creation process.")
         access_token = request.json.get('access_token')
-        
+
         if not access_token:
-            logging.error("Access token is required but not provided.")
+            logging.error("create_update_token: Access token is required but not provided")
             return jsonify({'error': 'access_token is required'}), 400
 
         update_request_data = LinkTokenCreateRequest(
             user=LinkTokenCreateRequestUser(client_user_id='unique_static_user_id'),
             client_name='finance-fetcher',
-            products=[Products('transactions'), Products('assets'), Products('liabilities')],
+            products=[Products('transactions'), Products('assets'), Products('liabilities'), Products('investments')],
             country_codes=[CountryCode('CA')],
             language='en',
             access_token=access_token
         )
         response = client.link_token_create(update_request_data)
         update_token = response['link_token']
-        logging.debug(f'Generated update token: {update_token}')
+        logging.debug(f'create_update_token: Generated update token: {update_token}')
         return jsonify({'update_token': update_token})
     except ApiException as e:
-        logging.error(f'API Exception: {str(e)} - {e.body}')
+        logging.error(f'create_update_token: API Exception: {str(e)} - {e.body}')
         return jsonify({'error': str(e)}), 500
     except Exception as e:
-        logging.error(f'Unexpected Exception: {str(e)}')
+        logging.error(f'create_update_token: Unexpected Exception: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
 @app.route('/')
 def index():
-    logging.info("Serving the main HTML page.")
+    logging.info("index: Serving the main HTML page.")
     return send_from_directory('../static', 'plaid_link.html')
 
 if __name__ == '__main__':
